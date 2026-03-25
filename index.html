@@ -71,9 +71,47 @@
             box-shadow: 0 5px 0 #3f6b32;
         }
         
-        .menu-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 #3f6b32;
+        .menu-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #3f6b32; }
+        
+        .admin-panel-btn {
+            background: #a05a2a;
+            border: none;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 8px 20px;
+            border-radius: 40px;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .admin-panel {
+            background: #2c1a0a;
+            border-radius: 30px;
+            padding: 15px;
+            margin: 15px 0;
+            display: none;
+        }
+        
+        .admin-panel.show { display: block; }
+        
+        .admin-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        
+        .admin-action-btn {
+            background: #7cba6e;
+            border: none;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 5px 12px;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
         }
         
         .stats-panel {
@@ -85,10 +123,7 @@
             justify-content: space-around;
         }
         
-        .stat-item {
-            font-weight: bold;
-            color: #482c12;
-        }
+        .stat-item { font-weight: bold; color: #482c12; }
         
         .difficulty-buttons {
             display: flex;
@@ -108,10 +143,7 @@
             cursor: pointer;
         }
         
-        .difficulty-btn.active {
-            background: #7cba6e;
-            color: white;
-        }
+        .difficulty-btn.active { background: #7cba6e; color: white; }
         
         .chars-grid {
             display: grid;
@@ -129,33 +161,11 @@
             border: 3px solid #e7bc7e;
         }
         
-        .char.selected {
-            border: 4px solid #f3b33d;
-            background: #ffe3b2;
-            transform: scale(1.02);
-        }
+        .char.selected { border: 4px solid #f3b33d; background: #ffe3b2; transform: scale(1.02); }
         
-        .char-avatar {
-            font-size: 3.5rem;
-        }
-        
-        .char-name {
-            font-size: 1rem;
-            font-weight: bold;
-            margin-top: 6px;
-            color: #6b3a1c;
-        }
-        
-        .char-rating {
-            font-size: 0.8rem;
-            color: #c97e2c;
-            background: #2c1a0a;
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 20px;
-            margin-top: 5px;
-            font-weight: bold;
-        }
+        .char-avatar { font-size: 3rem; }
+        .char-name { font-size: 1rem; font-weight: bold; margin-top: 6px; color: #6b3a1c; }
+        .char-rating { font-size: 0.8rem; color: #c97e2c; background: #2c1a0a; display: inline-block; padding: 2px 8px; border-radius: 20px; margin-top: 5px; font-weight: bold; }
         
         .back-btn {
             background: #e0a060;
@@ -204,6 +214,8 @@
             font-family: monospace;
         }
         
+        .player-info { background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 50px; color: #fff9e0; }
+        
         .game-buttons {
             position: absolute;
             bottom: 15px;
@@ -245,11 +257,7 @@
             border: 2px solid gold;
         }
         
-        .result-text {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: white;
-        }
+        .result-text { font-size: 1.3rem; font-weight: bold; color: white; }
         
         .controls-info {
             position: absolute;
@@ -257,12 +265,12 @@
             left: 0;
             right: 0;
             text-align: center;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             color: #ffefb0;
             background: rgba(0,0,0,0.5);
             width: fit-content;
             margin: 0 auto;
-            padding: 4px 12px;
+            padding: 3px 10px;
             border-radius: 20px;
             pointer-events: none;
         }
@@ -278,9 +286,26 @@
             animation: flash 0.5s ease-out;
         }
         
-        @keyframes flash {
-            0% { opacity: 1; }
-            100% { opacity: 0; }
+        @keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
+        
+        .shop-screen, .titles-screen, .glory-screen {
+            padding: 30px 20px;
+        }
+        
+        .shop-items, .titles-items {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .shop-item, .title-item {
+            background: #fae5b3;
+            border-radius: 30px;
+            padding: 20px;
+            width: 200px;
+            border: 3px solid #e7bc7e;
         }
         
         @media (max-width: 600px) {
@@ -291,6 +316,7 @@
 </head>
 <body>
 <div class="game-wrapper">
+    <!-- Главное меню -->
     <div id="mainMenu" class="screen main-menu">
         <h1>🍭 AIR HOCKEY 🍬</h1>
         <div class="stats-panel">
@@ -299,9 +325,25 @@
         </div>
         <div class="menu-buttons">
             <button id="startMenuBtn" class="menu-btn">⚡ СТАРТ</button>
+            <button id="shopMenuBtn" class="menu-btn">🛒 МАГАЗИН</button>
+            <button id="titlesMenuBtn" class="menu-btn">🏆 ТИТУЛЫ</button>
+            <button id="gloryMenuBtn" class="menu-btn">✨ ПУТЬ К СЛАВЕ</button>
+            <button id="adminPanelBtn" class="admin-panel-btn">🔧 АДМИН-ПАНЕЛЬ</button>
+        </div>
+        <div id="adminPanel" class="admin-panel">
+            <div class="admin-title">⚡ АДМИН-ПАНЕЛЬ ⚡</div>
+            <div class="admin-buttons">
+                <button id="adminPlus100Elo" class="admin-action-btn">+100 ЭЛО</button>
+                <button id="adminPlus500Elo" class="admin-action-btn">+500 ЭЛО</button>
+                <button id="adminMinusElo" class="admin-action-btn">-100 ЭЛО</button>
+                <button id="adminPlusCoins" class="admin-action-btn">+100 МОНЕТ</button>
+                <button id="adminSafeExit" class="admin-action-btn">🔓 БЕЗОПАСНЫЙ ВЫХОД</button>
+            </div>
+            <button id="adminCloseBtn" class="admin-exit-btn" style="background:#c06040; padding:5px 15px; border-radius:30px; margin-top:10px;">🚪 ЗАКРЫТЬ</button>
         </div>
     </div>
 
+    <!-- Выбор персонажа -->
     <div id="charScreen" class="screen" style="display: none; padding: 20px;">
         <h2>✨ ВЫБЕРИ БОЙЦА ✨</h2>
         <div class="difficulty-buttons">
@@ -314,19 +356,43 @@
         <button id="startGameBtn" class="menu-btn" style="margin-top: 15px;">⚡ НАЧАТЬ ИГРУ</button>
     </div>
 
+    <!-- Магазин -->
+    <div id="shopScreen" class="screen" style="display: none; padding: 20px;">
+        <h2>🛒 МАГАЗИН 🛒</h2>
+        <div class="shop-items" id="shopItems"></div>
+        <button id="backFromShopBtn" class="back-btn">🏠 НАЗАД</button>
+    </div>
+
+    <!-- Титулы -->
+    <div id="titlesScreen" class="screen" style="display: none; padding: 20px;">
+        <h2>🏆 ТИТУЛЫ 🏆</h2>
+        <div class="shop-items" id="titlesItems"></div>
+        <button id="backFromTitlesBtn" class="back-btn">🏠 НАЗАД</button>
+    </div>
+
+    <!-- Путь к славе -->
+    <div id="gloryScreen" class="screen" style="display: none; padding: 20px;">
+        <h2>✨ ПУТЬ К СЛАВЕ ✨</h2>
+        <div style="font-size: 2rem; margin: 20px;">⭐ <span id="gloryElo">0</span> ЭЛО</div>
+        <div style="font-size: 1.5rem;">💰 ДОСТУПНО МОНЕТ: <span id="gloryCoins">0</span></div>
+        <button id="collectCoinsBtn" class="menu-btn" style="margin: 15px auto;">💰 ЗАБРАТЬ МОНЕТЫ</button>
+        <button id="backFromGloryBtn" class="back-btn">🏠 НАЗАД</button>
+    </div>
+
+    <!-- Игра -->
     <div id="gameScreen" class="screen game-screen" style="display: none;">
         <div class="score-panel">
             <div class="score-box" id="playerScore">0</div>
-            <div class="player-info" id="playerInfo"></div>
-            <div class="player-info" id="botInfo"></div>
+            <div class="player-info" id="playerName"></div>
+            <div class="player-info" id="botName"></div>
             <div class="score-box" id="botScore">0</div>
         </div>
         <canvas id="gameCanvas" width="550" height="800"></canvas>
         <div class="game-buttons">
-            <button id="kickBtn" class="kick-btn">⚡ ПИНОК</button>
-            <button id="exitGameBtn" class="exit-btn">🏳️ СДАТЬСЯ</button>
+            <button id="kickBtn" class="kick-btn">⚡ ПИНОК (R)</button>
+            <button id="exitGameBtn" class="exit-btn">🏳️ СДАТЬСЯ (F)</button>
         </div>
-        <div class="controls-info">🏒 ВОДИ МЫШКОЙ ПО СВОЕЙ ПОЛОВИНЕ | 1 ГОЛ = 1 ОЧКО | ДО 5</div>
+        <div class="controls-info">🏒 УПРАВЛЕНИЕ: МЫШКА / WASD / СТРЕЛКИ | R - ПИНОК | F - СДАТЬСЯ</div>
         <div id="resultPanel" class="result-panel">
             <div id="resultText" class="result-text"></div>
             <button id="nextBtn" class="menu-btn" style="margin-top: 10px;">✨ В ГЛАВНОЕ МЕНЮ ✨</button>
@@ -336,7 +402,7 @@
 
 <script>
     (function() {
-        // Персонажи
+        // ==================== ПЕРСОНАЖИ ====================
         const CHARACTERS = [
             { name: "КОРЖИК", emoji: "🐱", color: "#6CA6CD" },
             { name: "КОМПОТ", emoji: "🐱", color: "#6B8E23" },
@@ -345,34 +411,58 @@
         ];
         
         let ratings = {0: 0, 1: 0, 2: 0, 3: 0};
+        let ownedTitles = [];
+        let activeTitle = null;
+        let coins = 0;
         let selectedChar = 0;
         let botChar = 0;
         let difficulty = 'medium';
+        let safeExitUnlocked = false;
         
-        function loadRatings() {
-            const saved = localStorage.getItem('airhockey_ratings');
+        function loadData() {
+            const saved = localStorage.getItem('airhockey_full');
             if (saved) {
-                try { const data = JSON.parse(saved); ratings = data; } catch(e) {}
+                try {
+                    const data = JSON.parse(saved);
+                    ratings = data.ratings || {0:0,1:0,2:0,3:0};
+                    ownedTitles = data.ownedTitles || [];
+                    activeTitle = data.activeTitle || null;
+                    coins = data.coins || 0;
+                    safeExitUnlocked = data.safeExitUnlocked || false;
+                } catch(e) {}
             }
+            updateStats();
         }
         
-        function saveRatings() {
-            localStorage.setItem('airhockey_ratings', JSON.stringify(ratings));
+        function saveData() {
+            localStorage.setItem('airhockey_full', JSON.stringify({
+                ratings, ownedTitles, activeTitle, coins, safeExitUnlocked
+            }));
         }
         
         function updateStats() {
             const total = ratings[0] + ratings[1] + ratings[2] + ratings[3];
-            document.getElementById('coinsDisplay').innerText = Math.floor(total / 50);
+            document.getElementById('coinsDisplay').innerText = coins;
             document.getElementById('totalEloDisplay').innerText = total;
+            document.getElementById('gloryElo').innerText = total;
+            document.getElementById('gloryCoins').innerText = Math.floor(total / 50) - coins;
         }
         
-        const mainMenu = document.getElementById('mainMenu');
-        const charScreen = document.getElementById('charScreen');
-        const gameScreen = document.getElementById('gameScreen');
-        const charsGrid = document.getElementById('charsGrid');
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        function collectCoins() {
+            const total = ratings[0] + ratings[1] + ratings[2] + ratings[3];
+            const earned = Math.floor(total / 50);
+            const available = earned - coins;
+            if (available > 0) {
+                coins += available;
+                saveData();
+                updateStats();
+                alert(`💰 Вы забрали ${available} монет!`);
+            } else {
+                alert("Нет доступных монет!");
+            }
+        }
         
+        // ==================== ОТРИСОВКА ПЕРСОНАЖА ====================
         function drawCharacter(ctx, x, y, color) {
             ctx.beginPath();
             ctx.arc(x, y, 35, 0, Math.PI * 2);
@@ -399,7 +489,8 @@
         }
         
         function renderCharacters() {
-            charsGrid.innerHTML = '';
+            const grid = document.getElementById('charsGrid');
+            grid.innerHTML = '';
             for (let i = 0; i < 4; i++) {
                 const div = document.createElement('div');
                 div.className = 'char' + (i === selectedChar ? ' selected' : '');
@@ -409,11 +500,63 @@
                     <div class="char-rating">⭐ ЭЛО: ${ratings[i]}</div>
                 `;
                 div.onclick = () => { selectedChar = i; renderCharacters(); };
-                charsGrid.appendChild(div);
+                grid.appendChild(div);
             }
         }
         
-        // Игровые переменные
+        function renderShop() {
+            const container = document.getElementById('shopItems');
+            const primeOwned = ownedTitles.includes('prime');
+            container.innerHTML = `
+                <div class="shop-item ${primeOwned ? 'owned' : ''}">
+                    <div style="font-size: 3rem;">🏆</div>
+                    <div><strong>ТИТУЛ "НАСТОЯЩИЙ ЧЕМПИОН"</strong></div>
+                    <div>+5 ЭЛО за гол, -5 ЭЛО за пропущенный</div>
+                    <div>💰 75 МОНЕТ</div>
+                    ${primeOwned ? '<div>✅ КУПЛЕНО</div>' : '<button id="buyPrimeBtn" class="menu-btn" style="font-size:0.8rem; padding:5px 10px;">КУПИТЬ</button>'}
+                </div>
+            `;
+            const buyBtn = document.getElementById('buyPrimeBtn');
+            if (buyBtn) {
+                buyBtn.onclick = () => {
+                    if (coins >= 75 && !ownedTitles.includes('prime')) {
+                        coins -= 75;
+                        ownedTitles.push('prime');
+                        saveData();
+                        updateStats();
+                        renderShop();
+                        renderTitles();
+                        alert('🎉 Титул куплен!');
+                    } else alert('Недостаточно монет!');
+                };
+            }
+        }
+        
+        function renderTitles() {
+            const container = document.getElementById('titlesItems');
+            if (ownedTitles.length === 0) {
+                container.innerHTML = '<div style="padding:20px;">😢 Нет титулов</div>';
+                return;
+            }
+            container.innerHTML = ownedTitles.map(title => `
+                <div class="shop-item ${activeTitle === title ? 'active-title' : ''}">
+                    <div style="font-size: 3rem;">🏆</div>
+                    <div><strong>${title === 'prime' ? 'НАСТОЯЩИЙ ЧЕМПИОН' : title}</strong></div>
+                    <div>${title === 'prime' ? '+5 ЭЛО за гол, -5 ЭЛО за пропущенный' : ''}</div>
+                    <button class="apply-title-btn menu-btn" style="font-size:0.8rem; padding:5px 10px;">${activeTitle === title ? '✅ АКТИВЕН' : '🔹 ПРИМЕНИТЬ'}</button>
+                </div>
+            `).join('');
+            document.querySelectorAll('.apply-title-btn').forEach((btn, i) => {
+                btn.onclick = () => {
+                    activeTitle = ownedTitles[i];
+                    saveData();
+                    renderTitles();
+                    alert('Титул активирован!');
+                };
+            });
+        }
+        
+        // ==================== ИГРОВЫЕ ПЕРЕМЕННЫЕ ====================
         let playerScore = 0, botScore = 0;
         let gameActive = false;
         let animationId = null;
@@ -436,9 +579,10 @@
         let botSpeed = 0.09;
         let botError = 0.05;
         
-        // Delta Time переменные
         let lastTimestamp = 0;
         let deltaTime = 1 / 60;
+        
+        let keys = { w: false, s: false, a: false, d: false };
         
         function setDifficulty(level) {
             difficulty = level;
@@ -453,11 +597,11 @@
             playerScore = 0; botScore = 0;
             document.getElementById('playerScore').innerText = "0";
             document.getElementById('botScore').innerText = "0";
-            document.getElementById('playerInfo').innerHTML = CHARACTERS[selectedChar].name;
-            document.getElementById('botInfo').innerHTML = CHARACTERS[botChar].name;
+            document.getElementById('playerName').innerHTML = CHARACTERS[selectedChar].name;
+            document.getElementById('botName').innerHTML = CHARACTERS[botChar].name;
             
-            gameScreen.style.display = 'block';
-            charScreen.style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            document.getElementById('charScreen').style.display = 'none';
             gameActive = true;
             
             puck.x = W/2; puck.y = H/2;
@@ -479,7 +623,7 @@
             let diff = playerScore - botScore;
             let gain = diff * (difficulty === 'easy' ? 10 : difficulty === 'medium' ? 20 : 30);
             ratings[selectedChar] += gain;
-            saveRatings();
+            saveData();
             updateStats();
             
             let msg = playerScore > botScore ? '🏆 ПОБЕДА! 🏆' : (playerScore < botScore ? '😭 ПОРАЖЕНИЕ... 😭' : '🤝 НИЧЬЯ 🤝');
@@ -496,10 +640,9 @@
             
             if (playerScore >= 5 || botScore >= 5) { endGame(); return; }
             
-            // Вспышка
             const flash = document.createElement('div');
             flash.className = 'goal-flash';
-            gameScreen.appendChild(flash);
+            document.getElementById('gameScreen').appendChild(flash);
             setTimeout(() => flash.remove(), 500);
             
             puck.x = W/2; puck.y = H/2;
@@ -514,27 +657,30 @@
             targetY = Math.max(BOT_AREA.minY + 15, Math.min(BOT_AREA.maxY - 15, targetY));
             let dx = targetX - botPaddle.x, dy = targetY - botPaddle.y;
             if (Math.random() < botError) { dx *= 0.6; dy *= 0.6; }
-            // Скорость движения бота зависит от времени
-            let moveX = Math.min(6, Math.max(-6, dx * botSpeed * (dt * 60)));
-            let moveY = Math.min(6, Math.max(-6, dy * botSpeed * (dt * 60)));
-            botPaddle.x += moveX;
-            botPaddle.y += moveY;
+            botPaddle.x += Math.min(6, Math.max(-6, dx * botSpeed * (dt * 60)));
+            botPaddle.y += Math.min(6, Math.max(-6, dy * botSpeed * (dt * 60)));
             botPaddle.x = Math.max(BOT_AREA.minX, Math.min(BOT_AREA.maxX, botPaddle.x));
             botPaddle.y = Math.max(BOT_AREA.minY, Math.min(BOT_AREA.maxY, botPaddle.y));
         }
         
+        function updateKeyboardMovement() {
+            let speed = 7;
+            if (keys.w) mouseY -= speed;
+            if (keys.s) mouseY += speed;
+            if (keys.a) mouseX -= speed;
+            if (keys.d) mouseX += speed;
+            mouseX = Math.max(PLAYER_AREA.minX, Math.min(PLAYER_AREA.maxX, mouseX));
+            mouseY = Math.max(PLAYER_AREA.minY, Math.min(PLAYER_AREA.maxY, mouseY));
+        }
+        
         function updatePhysics(dt) {
             if (!gameActive) return;
-            
-            // Движение шайбы с учётом времени
             puck.x += puck.vx * dt * 60;
             puck.y += puck.vy * dt * 60;
             
-            // Стены
             if (puck.x - PUCK_R <= 0) { puck.x = PUCK_R; puck.vx = -puck.vx; }
             if (puck.x + PUCK_R >= W) { puck.x = W - PUCK_R; puck.vx = -puck.vx; }
             
-            // Голы
             if (puck.y - PUCK_R <= 0) {
                 if (puck.x >= TOP_GOAL_X && puck.x <= TOP_GOAL_X + GOAL_WIDTH) { scoreGoal('player'); return; }
                 else { puck.y = PUCK_R; puck.vy = -puck.vy; }
@@ -544,7 +690,6 @@
                 else { puck.y = H - PUCK_R; puck.vy = -puck.vy; }
             }
             
-            // Столкновение с ракеткой игрока
             const dx1 = puck.x - playerPaddle.x, dy1 = puck.y - playerPaddle.y;
             if (Math.hypot(dx1, dy1) < PUCK_R + PADDLE_R) {
                 const angle = Math.atan2(dy1, dx1);
@@ -557,7 +702,6 @@
                 puck.y += Math.sin(angle) * overlap;
             }
             
-            // Столкновение с ракеткой бота
             const dx2 = puck.x - botPaddle.x, dy2 = puck.y - botPaddle.y;
             if (Math.hypot(dx2, dy2) < PUCK_R + PADDLE_R) {
                 const angle = Math.atan2(dy2, dx2);
@@ -570,11 +714,8 @@
                 puck.y += Math.sin(angle) * overlap;
             }
             
-            // Ограничения
             puck.x = Math.max(PUCK_R, Math.min(W - PUCK_R, puck.x));
             puck.y = Math.max(PUCK_R, Math.min(H - PUCK_R, puck.y));
-            
-            // Ракетка игрока (движение мышкой не зависит от времени)
             playerPaddle.x = mouseX;
             playerPaddle.y = mouseY;
             playerPaddle.x = Math.max(PLAYER_AREA.minX, Math.min(PLAYER_AREA.maxX, playerPaddle.x));
@@ -622,20 +763,13 @@
         }
         
         function gameLoop(timestamp) {
-            if (!gameActive) {
-                draw();
-                return;
-            }
-            
-            // Вычисляем deltaTime (время между кадрами в секундах)
+            if (!gameActive) { draw(); return; }
             if (lastTimestamp === 0) lastTimestamp = timestamp;
             let dt = Math.min(0.033, (timestamp - lastTimestamp) / 1000);
             lastTimestamp = timestamp;
-            
-            // Защита от слишком больших значений
-            if (dt > 0.033) dt = 0.033;
             if (dt < 0.005) dt = 0.016;
             
+            updateKeyboardMovement();
             updateBot(dt);
             updatePhysics(dt);
             draw();
@@ -653,40 +787,81 @@
             if (e.touches) e.preventDefault();
         }
         
-        function kickReset() {
-            if (gameActive) {
-                puck.x = W/2;
-                puck.y = H/2;
-                puck.vx = (Math.random() - 0.5) * 5;
-                puck.vy = (Math.random() - 0.5) * 5;
-            }
+        function kickReset() { if (gameActive) { puck.x = W/2; puck.y = H/2; puck.vx = (Math.random()-0.5)*5; puck.vy = (Math.random()-0.5)*5; } }
+        
+        function handleKeyDown(e) {
+            const key = e.key.toLowerCase();
+            if (key === 'w' || key === 'arrowup') keys.w = true;
+            if (key === 's' || key === 'arrowdown') keys.s = true;
+            if (key === 'a' || key === 'arrowleft') keys.a = true;
+            if (key === 'd' || key === 'arrowright') keys.d = true;
+            if (key === 'r') { kickReset(); e.preventDefault(); }
+            if (key === 'f') { if (gameActive) endGame(); e.preventDefault(); }
         }
         
-        // Навигация
+        function handleKeyUp(e) {
+            const key = e.key.toLowerCase();
+            if (key === 'w' || key === 'arrowup') keys.w = false;
+            if (key === 's' || key === 'arrowdown') keys.s = false;
+            if (key === 'a' || key === 'arrowleft') keys.a = false;
+            if (key === 'd' || key === 'arrowright') keys.d = false;
+        }
+        
+        // ==================== НАВИГАЦИЯ ====================
         document.getElementById('startMenuBtn').onclick = () => {
-            mainMenu.style.display = 'none';
-            charScreen.style.display = 'block';
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('charScreen').style.display = 'block';
             renderCharacters();
         };
         
-        document.getElementById('backToMainBtn').onclick = () => {
-            charScreen.style.display = 'none';
-            mainMenu.style.display = 'block';
+        document.getElementById('shopMenuBtn').onclick = () => {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('shopScreen').style.display = 'block';
+            renderShop();
         };
         
-        document.getElementById('startGameBtn').onclick = () => {
-            startGame();
+        document.getElementById('titlesMenuBtn').onclick = () => {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('titlesScreen').style.display = 'block';
+            renderTitles();
         };
         
-        document.getElementById('nextBtn').onclick = () => {
-            document.getElementById('resultPanel').style.display = 'none';
-            gameScreen.style.display = 'none';
-            mainMenu.style.display = 'block';
+        document.getElementById('gloryMenuBtn').onclick = () => {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('gloryScreen').style.display = 'block';
             updateStats();
         };
         
+        document.getElementById('backToMainBtn').onclick = () => {
+            document.getElementById('charScreen').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'block';
+        };
+        
+        document.getElementById('backFromShopBtn').onclick = () => {
+            document.getElementById('shopScreen').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'block';
+        };
+        
+        document.getElementById('backFromTitlesBtn').onclick = () => {
+            document.getElementById('titlesScreen').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'block';
+        };
+        
+        document.getElementById('backFromGloryBtn').onclick = () => {
+            document.getElementById('gloryScreen').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'block';
+        };
+        
+        document.getElementById('collectCoinsBtn').onclick = collectCoins;
+        document.getElementById('startGameBtn').onclick = startGame;
         document.getElementById('kickBtn').onclick = kickReset;
         document.getElementById('exitGameBtn').onclick = () => { if (gameActive) endGame(); };
+        document.getElementById('nextBtn').onclick = () => {
+            document.getElementById('resultPanel').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'block';
+            updateStats();
+        };
         
         document.getElementById('easyBtn').onclick = () => {
             setDifficulty('easy');
@@ -704,14 +879,60 @@
             document.getElementById('hardBtn').classList.add('active');
         };
         
+        // Админ-панель
+        document.getElementById('adminPanelBtn').onclick = () => {
+            document.getElementById('adminPanel').classList.toggle('show');
+        };
+        document.getElementById('adminCloseBtn').onclick = () => {
+            document.getElementById('adminPanel').classList.remove('show');
+        };
+        document.getElementById('adminPlus100Elo').onclick = () => {
+            ratings[selectedChar] += 100;
+            if (ratings[selectedChar] > 3000) ratings[selectedChar] = 3000;
+            saveData();
+            updateStats();
+            renderCharacters();
+            alert('+100 ЭЛО');
+        };
+        document.getElementById('adminPlus500Elo').onclick = () => {
+            ratings[selectedChar] += 500;
+            if (ratings[selectedChar] > 3000) ratings[selectedChar] = 3000;
+            saveData();
+            updateStats();
+            renderCharacters();
+            alert('+500 ЭЛО');
+        };
+        document.getElementById('adminMinusElo').onclick = () => {
+            ratings[selectedChar] -= 100;
+            if (ratings[selectedChar] < 0) ratings[selectedChar] = 0;
+            saveData();
+            updateStats();
+            renderCharacters();
+            alert('-100 ЭЛО');
+        };
+        document.getElementById('adminPlusCoins').onclick = () => {
+            coins += 100;
+            saveData();
+            updateStats();
+            alert('+100 МОНЕТ');
+        };
+        document.getElementById('adminSafeExit').onclick = () => {
+            safeExitUnlocked = true;
+            saveData();
+            alert('Безопасный выход разблокирован');
+        };
+        
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
         canvas.addEventListener('mousemove', handleMouseMove);
         canvas.addEventListener('touchmove', handleMouseMove, { passive: false });
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
         
-        loadRatings();
-        updateStats();
-        setDifficulty('medium');
+        loadData();
         renderCharacters();
-        mainMenu.style.display = 'block';
+        setDifficulty('medium');
+        document.getElementById('mainMenu').style.display = 'block';
     })();
 </script>
 </body>
