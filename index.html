@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Аэрохоккей — Три Кота</title>
+    <title>Аэрохоккей — Три Кота + Горчица</title>
     <style>
         * {
             user-select: none;
@@ -71,7 +71,24 @@
             box-shadow: 0 5px 0 #3f6b32;
         }
         
-        .menu-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #3f6b32; }
+        .menu-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #3f6b32;
+        }
+        
+        .reset-stats-btn {
+            background: #e0a060;
+            border: none;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 10px 25px;
+            border-radius: 40px;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+            font-family: inherit;
+            box-shadow: 0 3px 0 #a06030;
+        }
         
         .admin-panel-btn {
             background: #a05a2a;
@@ -83,6 +100,7 @@
             color: white;
             cursor: pointer;
             margin-top: 10px;
+            font-family: inherit;
         }
         
         .admin-panel {
@@ -95,25 +113,6 @@
         
         .admin-panel.show { display: block; }
         
-        .admin-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin: 10px 0;
-        }
-        
-        .admin-action-btn {
-            background: #7cba6e;
-            border: none;
-            font-size: 0.8rem;
-            font-weight: bold;
-            padding: 5px 12px;
-            border-radius: 25px;
-            color: white;
-            cursor: pointer;
-        }
-        
         .stats-panel {
             background: #f5bc70;
             border-radius: 30px;
@@ -123,7 +122,10 @@
             justify-content: space-around;
         }
         
-        .stat-item { font-weight: bold; color: #482c12; }
+        .stat-item {
+            font-weight: bold;
+            color: #482c12;
+        }
         
         .difficulty-buttons {
             display: flex;
@@ -143,7 +145,10 @@
             cursor: pointer;
         }
         
-        .difficulty-btn.active { background: #7cba6e; color: white; }
+        .difficulty-btn.active {
+            background: #7cba6e;
+            color: white;
+        }
         
         .chars-grid {
             display: grid;
@@ -153,19 +158,95 @@
             padding: 0 15px;
         }
         
+        .chars-grid.has-gorchitsa {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
         .char {
             background: #fae5b3;
             border-radius: 35px;
             padding: 12px 10px;
             cursor: pointer;
             border: 3px solid #e7bc7e;
+            transition: all 0.2s;
         }
         
-        .char.selected { border: 4px solid #f3b33d; background: #ffe3b2; transform: scale(1.02); }
+        .char.selected {
+            border: 4px solid #f3b33d;
+            background: #ffe3b2;
+            transform: scale(1.02);
+        }
         
-        .char-avatar { font-size: 3rem; }
-        .char-name { font-size: 1rem; font-weight: bold; margin-top: 6px; color: #6b3a1c; }
-        .char-rating { font-size: 0.8rem; color: #c97e2c; background: #2c1a0a; display: inline-block; padding: 2px 8px; border-radius: 20px; margin-top: 5px; font-weight: bold; }
+        .char.gray {
+            filter: grayscale(0.7);
+            background: #c0c0c0;
+        }
+        
+        .char-canvas {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto;
+            display: block;
+        }
+        
+        .char-rating {
+            font-size: 0.8rem;
+            color: #c97e2c;
+            background: #2c1a0a;
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        
+        .char-elo-info {
+            font-size: 0.7rem;
+            color: #7cba6e;
+            margin-top: 3px;
+        }
+        
+        .prime-badge {
+            font-size: 0.65rem;
+            color: gold;
+            background: #2c1a0a;
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 15px;
+            margin-top: 3px;
+            font-weight: bold;
+        }
+        
+        .shop-items, .titles-items {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .shop-item {
+            background: #fae5b3;
+            border-radius: 30px;
+            padding: 20px;
+            width: 260px;
+            border: 3px solid #e7bc7e;
+            position: relative;
+        }
+        
+        .shop-item.owned {
+            opacity: 0.85;
+        }
+        
+        .shop-item.locked {
+            opacity: 0.5;
+            filter: grayscale(0.3);
+        }
+        
+        .shop-item.active-title {
+            border: 4px solid gold;
+            background: #ffe3b2;
+        }
         
         .back-btn {
             background: #e0a060;
@@ -180,8 +261,8 @@
         
         .game-screen {
             position: relative;
-            width: 550px;
-            height: 800px;
+            width: 650px;
+            height: 850px;
         }
         
         canvas {
@@ -214,11 +295,35 @@
             font-family: monospace;
         }
         
-        .player-info { background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 50px; color: #fff9e0; }
+        .player-info {
+            background: rgba(0,0,0,0.7);
+            padding: 5px 15px;
+            border-radius: 50px;
+            color: #fff9e0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .controls-info {
+            position: absolute;
+            bottom: 15px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.65rem;
+            color: #ffefb0;
+            background: rgba(0,0,0,0.6);
+            width: fit-content;
+            margin: 0 auto;
+            padding: 4px 12px;
+            border-radius: 20px;
+            pointer-events: none;
+            z-index: 15;
+        }
         
         .game-buttons {
             position: absolute;
-            bottom: 15px;
+            bottom: 50px;
             left: 0;
             right: 0;
             display: flex;
@@ -227,7 +332,7 @@
             z-index: 20;
         }
         
-        .kick-btn, .exit-btn {
+        .kick-btn, .exit-btn, .safe-exit-btn {
             background: rgba(0,0,0,0.8);
             border: none;
             padding: 6px 16px;
@@ -240,6 +345,7 @@
         
         .kick-btn { background: rgba(100,150,200,0.9); }
         .exit-btn { background: rgba(220,80,60,0.9); }
+        .safe-exit-btn { background: rgba(80,180,80,0.9); }
         
         .result-panel {
             position: absolute;
@@ -255,24 +361,13 @@
             flex-direction: column;
             gap: 12px;
             border: 2px solid gold;
+            min-width: 320px;
         }
         
-        .result-text { font-size: 1.3rem; font-weight: bold; color: white; }
-        
-        .controls-info {
-            position: absolute;
-            bottom: 60px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 0.6rem;
-            color: #ffefb0;
-            background: rgba(0,0,0,0.5);
-            width: fit-content;
-            margin: 0 auto;
-            padding: 3px 10px;
-            border-radius: 20px;
-            pointer-events: none;
+        .result-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: white;
         }
         
         .goal-flash {
@@ -286,37 +381,74 @@
             animation: flash 0.5s ease-out;
         }
         
-        @keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
-        
-        .shop-screen, .titles-screen, .glory-screen {
-            padding: 30px 20px;
+        @keyframes flash {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
         }
         
-        .shop-items, .titles-items {
+        .collect-btn {
+            background: #7cba6e;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 10px 25px;
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            margin: 15px auto;
+        }
+        
+        .title-actions {
             display: flex;
+            gap: 10px;
             justify-content: center;
-            gap: 20px;
-            margin: 20px;
+            margin-top: 10px;
             flex-wrap: wrap;
         }
         
-        .shop-item, .title-item {
-            background: #fae5b3;
-            border-radius: 30px;
-            padding: 20px;
-            width: 200px;
-            border: 3px solid #e7bc7e;
+        .sell-btn, .deactivate-btn {
+            background: #c06040;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.7rem;
         }
         
-        @media (max-width: 600px) {
-            .game-screen { width: 95vw; height: 135vw; }
-            .score-box { padding: 3px 12px; font-size: 1.2rem; }
+        .deactivate-btn { background: #e0a060; }
+        
+        @media (max-width: 700px) {
+            .screen { min-width: 95vw; }
+            .game-screen { width: 95vw; height: 124vw; }
+            .controls-info { font-size: 0.55rem; bottom: 10px; }
+            .game-buttons { bottom: 45px; }
+        }
+        
+        .buy-btn, .apply-title-btn {
+            background: #7cba6e;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .admin-action-btn {
+            background: #7cba6e;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin: 3px;
         }
     </style>
 </head>
 <body>
 <div class="game-wrapper">
-    <!-- Главное меню -->
     <div id="mainMenu" class="screen main-menu">
         <h1>🍭 AIR HOCKEY 🍬</h1>
         <div class="stats-panel">
@@ -328,22 +460,23 @@
             <button id="shopMenuBtn" class="menu-btn">🛒 МАГАЗИН</button>
             <button id="titlesMenuBtn" class="menu-btn">🏆 ТИТУЛЫ</button>
             <button id="gloryMenuBtn" class="menu-btn">✨ ПУТЬ К СЛАВЕ</button>
+            <button id="resetStatsMainBtn" class="reset-stats-btn">🔄 СБРОСИТЬ СТАТИСТИКУ</button>
             <button id="adminPanelBtn" class="admin-panel-btn">🔧 АДМИН-ПАНЕЛЬ</button>
         </div>
         <div id="adminPanel" class="admin-panel">
             <div class="admin-title">⚡ АДМИН-ПАНЕЛЬ ⚡</div>
-            <div class="admin-buttons">
+            <div class="admin-buttons" style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
                 <button id="adminPlus100Elo" class="admin-action-btn">+100 ЭЛО</button>
                 <button id="adminPlus500Elo" class="admin-action-btn">+500 ЭЛО</button>
-                <button id="adminMinusElo" class="admin-action-btn">-100 ЭЛО</button>
+                <button id="adminPlus1000Elo" class="admin-action-btn">+1000 ЭЛО</button>
+                <button id="adminMinusBtn" class="admin-action-btn">-100 ЭЛО</button>
                 <button id="adminPlusCoins" class="admin-action-btn">+100 МОНЕТ</button>
-                <button id="adminSafeExit" class="admin-action-btn">🔓 БЕЗОПАСНЫЙ ВЫХОД</button>
+                <button id="adminSafeExitBtn" class="admin-action-btn" style="background:#4c9a6e;">🔓 БЕЗОПАСНЫЙ ВЫХОД</button>
             </div>
-            <button id="adminCloseBtn" class="admin-exit-btn" style="background:#c06040; padding:5px 15px; border-radius:30px; margin-top:10px;">🚪 ЗАКРЫТЬ</button>
+            <button id="adminExitBtn" class="admin-exit-btn" style="background:#c06040; margin-top:10px; padding:5px 15px; border-radius:30px;">🚪 ЗАКРЫТЬ</button>
         </div>
     </div>
 
-    <!-- Выбор персонажа -->
     <div id="charScreen" class="screen" style="display: none; padding: 20px;">
         <h2>✨ ВЫБЕРИ БОЙЦА ✨</h2>
         <div class="difficulty-buttons">
@@ -356,43 +489,41 @@
         <button id="startGameBtn" class="menu-btn" style="margin-top: 15px;">⚡ НАЧАТЬ ИГРУ</button>
     </div>
 
-    <!-- Магазин -->
     <div id="shopScreen" class="screen" style="display: none; padding: 20px;">
         <h2>🛒 МАГАЗИН 🛒</h2>
         <div class="shop-items" id="shopItems"></div>
         <button id="backFromShopBtn" class="back-btn">🏠 НАЗАД</button>
     </div>
 
-    <!-- Титулы -->
     <div id="titlesScreen" class="screen" style="display: none; padding: 20px;">
         <h2>🏆 ТИТУЛЫ 🏆</h2>
         <div class="shop-items" id="titlesItems"></div>
         <button id="backFromTitlesBtn" class="back-btn">🏠 НАЗАД</button>
     </div>
 
-    <!-- Путь к славе -->
     <div id="gloryScreen" class="screen" style="display: none; padding: 20px;">
         <h2>✨ ПУТЬ К СЛАВЕ ✨</h2>
         <div style="font-size: 2rem; margin: 20px;">⭐ <span id="gloryElo">0</span> ЭЛО</div>
-        <div style="font-size: 1.5rem;">💰 ДОСТУПНО МОНЕТ: <span id="gloryCoins">0</span></div>
-        <button id="collectCoinsBtn" class="menu-btn" style="margin: 15px auto;">💰 ЗАБРАТЬ МОНЕТЫ</button>
+        <div style="font-size: 1.5rem;">💰 ДОСТУПНО МОНЕТ: <span id="gloryAvailable">0</span></div>
+        <button id="collectCoinsBtn" class="collect-btn">💰 ЗАБРАТЬ МОНЕТЫ</button>
+        <div class="stats-panel" style="margin-top: 20px;"><div class="stat-item">📊 50 ЭЛО = 1 МОНЕТА</div></div>
         <button id="backFromGloryBtn" class="back-btn">🏠 НАЗАД</button>
     </div>
 
-    <!-- Игра -->
     <div id="gameScreen" class="screen game-screen" style="display: none;">
         <div class="score-panel">
             <div class="score-box" id="playerScore">0</div>
-            <div class="player-info" id="playerName"></div>
-            <div class="player-info" id="botName"></div>
+            <div class="player-info"><span id="playerName"></span><span id="titleBonus" style="font-size:0.7rem;"></span></div>
+            <div class="player-info"><span id="botName">БОТ</span><span id="botDifficulty"></span></div>
             <div class="score-box" id="botScore">0</div>
         </div>
-        <canvas id="gameCanvas" width="550" height="800"></canvas>
+        <canvas id="gameCanvas" width="650" height="850"></canvas>
+        <div class="controls-info">⌨️ УПРАВЛЕНИЕ: МЫШКА / WASD / СТРЕЛКИ (можно зажимать) | R - ПИНОК | F - СДАТЬСЯ</div>
         <div class="game-buttons">
-            <button id="kickBtn" class="kick-btn">⚡ ПИНОК (R)</button>
             <button id="exitGameBtn" class="exit-btn">🏳️ СДАТЬСЯ (F)</button>
+            <button id="kickBtn" class="kick-btn">⚡ ПИНОК (R)</button>
+            <button id="safeExitGameBtn" class="safe-exit-btn" style="display: none;">🚪 БЕЗ ПОТЕРИ</button>
         </div>
-        <div class="controls-info">🏒 УПРАВЛЕНИЕ: МЫШКА / WASD / СТРЕЛКИ | R - ПИНОК | F - СДАТЬСЯ</div>
         <div id="resultPanel" class="result-panel">
             <div id="resultText" class="result-text"></div>
             <button id="nextBtn" class="menu-btn" style="margin-top: 10px;">✨ В ГЛАВНОЕ МЕНЮ ✨</button>
@@ -402,537 +533,495 @@
 
 <script>
     (function() {
-        // ==================== ПЕРСОНАЖИ ====================
-        const CHARACTERS = [
-            { name: "КОРЖИК", emoji: "🐱", color: "#6CA6CD" },
-            { name: "КОМПОТ", emoji: "🐱", color: "#6B8E23" },
-            { name: "ГОНЯ", emoji: "🐱", color: "#808080" },
-            { name: "КАРАМЕЛЬКА", emoji: "🐱", color: "#CD5C5C" }
-        ];
-        
-        let ratings = {0: 0, 1: 0, 2: 0, 3: 0};
+        // Данные игрока
+        let coins = 0;
         let ownedTitles = [];
         let activeTitle = null;
-        let coins = 0;
-        let selectedChar = 0;
-        let botChar = 0;
-        let difficulty = 'medium';
+        let adminAuthenticated = false;
         let safeExitUnlocked = false;
+        let ratings = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0};
+        let difficulty = 'medium';
+        const MAX_ELO = 2000;
         
-        function loadData() {
-            const saved = localStorage.getItem('airhockey_full');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    ratings = data.ratings || {0:0,1:0,2:0,3:0};
-                    ownedTitles = data.ownedTitles || [];
-                    activeTitle = data.activeTitle || null;
-                    coins = data.coins || 0;
-                    safeExitUnlocked = data.safeExitUnlocked || false;
-                } catch(e) {}
+        let cornerHitCount = 0;
+        let lastCornerHitTime = 0;
+        let stuckCount = 0;
+        let lastPuckPos = { x: 0, y: 0 };
+        let lastStuckCheck = 0;
+        
+        let ludomanUsed = false;
+        
+        let baseEloPerGoal = { easy: 10, medium: 20, hard: 35 };
+        
+        // Клавиши для управления
+        let keysPressed = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, w: false, s: false, a: false, d: false };
+        
+        // Delta Time переменные
+        let lastTimestamp = 0;
+        let deltaTime = 1 / 60;
+        
+        function applyEloLimit() {
+            for (let i = 0; i < 5; i++) {
+                if (ratings[i] > MAX_ELO) ratings[i] = MAX_ELO;
+                if (ratings[i] < 0) ratings[i] = 0;
             }
-            updateStats();
         }
         
-        function saveData() {
-            localStorage.setItem('airhockey_full', JSON.stringify({
-                ratings, ownedTitles, activeTitle, coins, safeExitUnlocked
-            }));
+        function getEloPerGoal() {
+            let playerElo = ratings[selectedChar];
+            let base = baseEloPerGoal[difficulty];
+            if (playerElo >= 1500) return Math.floor(base * 0.7);
+            if (playerElo >= 1000) return Math.floor(base * 0.85);
+            return base;
         }
         
-        function updateStats() {
-            const total = ratings[0] + ratings[1] + ratings[2] + ratings[3];
-            document.getElementById('coinsDisplay').innerText = coins;
-            document.getElementById('totalEloDisplay').innerText = total;
-            document.getElementById('gloryElo').innerText = total;
-            document.getElementById('gloryCoins').innerText = Math.floor(total / 50) - coins;
+        function getTitleBonusPerGoal() {
+            if (activeTitle === 'prime') return 5;
+            return 0;
         }
+        
+        function getTitlePenaltyPerGoal() {
+            if (activeTitle === 'prime') return -5;
+            return 0;
+        }
+        
+        function checkLudomanEffect() {
+            if (activeTitle === 'ludoman' && !ludomanUsed) {
+                if (Math.random() < 0.1) {
+                    ludomanUsed = true;
+                    let win = Math.random() < 0.5;
+                    if (win) {
+                        playerScore = 5;
+                        botScore = 0;
+                        alert("🎲 ЛУДОМАН! ВЫ ВЫИГРАЛИ 5:0! 🎲");
+                    } else {
+                        playerScore = 0;
+                        botScore = 5;
+                        alert("🎲 ЛУДОМАН! ВЫ ПРОИГРАЛИ 0:5! 🎲");
+                    }
+                    endGame(false, false);
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        let surrenderPenalty = { easy: -30, medium: -60, hard: -90 };
+        let drawPenalty = -20;
+        let winLimit = 5;
+        
+        function getTotalElo() { return ratings[0] + ratings[1] + ratings[2] + ratings[3] + ratings[4]; }
+        function calculateAvailableCoins() { return Math.max(0, Math.floor(getTotalElo() / 50) - coins); }
         
         function collectCoins() {
-            const total = ratings[0] + ratings[1] + ratings[2] + ratings[3];
-            const earned = Math.floor(total / 50);
-            const available = earned - coins;
-            if (available > 0) {
-                coins += available;
-                saveData();
-                updateStats();
-                alert(`💰 Вы забрали ${available} монет!`);
-            } else {
-                alert("Нет доступных монет!");
-            }
+            let available = calculateAvailableCoins();
+            if (available > 0) { coins += available; saveData(); updateStatsDisplay(); updateGloryDisplay(); alert(`💰 Вы забрали ${available} монет!`); }
+            else alert("Нет доступных монет!");
         }
         
-        // ==================== ОТРИСОВКА ПЕРСОНАЖА ====================
-        function drawCharacter(ctx, x, y, color) {
-            ctx.beginPath();
-            ctx.arc(x, y, 35, 0, Math.PI * 2);
-            ctx.fillStyle = color;
-            ctx.fill();
-            ctx.fillStyle = "white";
-            ctx.beginPath();
-            ctx.arc(x - 12, y - 8, 6, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x + 12, y - 8, 6, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = "black";
-            ctx.beginPath();
-            ctx.arc(x - 12, y - 8, 3, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x + 12, y - 8, 3, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = "#E87A5C";
-            ctx.beginPath();
-            ctx.ellipse(x, y + 5, 6, 5, 0, 0, Math.PI * 2);
-            ctx.fill();
+        function resetAllStats() {
+            coins = 0; ownedTitles = []; activeTitle = null; ratings = {0:0,1:0,2:0,3:0,4:0}; safeExitUnlocked = false;
+            saveData(); updateStatsDisplay(); renderCharacters(); renderShop(); renderTitles();
+            alert("✅ Статистика сброшена!");
+        }
+        
+        function loadData() {
+            const saved = localStorage.getItem('airhockey_final_v7');
+            if (saved) {
+                try { const data = JSON.parse(saved); coins = data.coins || 0; ownedTitles = data.ownedTitles || []; activeTitle = data.activeTitle || null; ratings = data.ratings || {0:0,1:0,2:0,3:0,4:0}; safeExitUnlocked = data.safeExitUnlocked || false; } catch(e) {}
+            }
+            applyEloLimit();
+            updateStatsDisplay();
+        }
+        function saveData() { localStorage.setItem('airhockey_final_v7', JSON.stringify({coins, ownedTitles, activeTitle, ratings, safeExitUnlocked})); }
+        function updateStatsDisplay() { document.getElementById('coinsDisplay').innerText = coins; document.getElementById('totalEloDisplay').innerText = getTotalElo(); }
+        function updateGloryDisplay() { document.getElementById('gloryElo').innerText = getTotalElo(); document.getElementById('gloryAvailable').innerText = calculateAvailableCoins(); }
+        
+        function addEloToChar(amount) {
+            ratings[selectedChar] += amount;
+            applyEloLimit();
+            saveData(); updateStatsDisplay(); renderCharacters();
+        }
+        
+        function addCoins(amount) {
+            coins += amount;
+            saveData(); updateStatsDisplay(); renderShop(); renderTitles();
+        }
+        
+        function sellTitle(titleId) {
+            let price = (titleId === 'prime' || titleId === 'ludoman') ? 75 : 10;
+            if (ownedTitles.includes(titleId)) {
+                if (activeTitle === titleId) activeTitle = null;
+                ownedTitles = ownedTitles.filter(t => t !== titleId);
+                coins += price;
+                saveData(); updateStatsDisplay(); renderShop(); renderTitles(); renderCharacters();
+                alert(`💰 Вы продали титул за ${price} монет!`);
+            } else alert("У вас нет этого титула!");
+        }
+        
+        function deactivateTitle() { activeTitle = null; saveData(); renderTitles(); alert("🔓 Титул деактивирован!"); }
+        
+        // Рисование персонажей
+        function drawCharacter(ctx, x, y, color1, hasBow=false) {
+            const r=40; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=color1; ctx.fill();
+            ctx.fillStyle="#FFFFFF"; ctx.beginPath(); ctx.arc(x-12,y-8,7,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(x+12,y-8,7,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle="#2C2C2C"; ctx.beginPath(); ctx.arc(x-12,y-8,4,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(x+12,y-8,4,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle="#E87A5C"; ctx.beginPath(); ctx.ellipse(x,y+5,7,6,0,0,Math.PI*2); ctx.fill();
+            if(hasBow){ ctx.fillStyle="#FFB6C1"; ctx.beginPath(); ctx.ellipse(x,y-28,14,9,0,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.ellipse(x-10,y-30,8,7,-0.5,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.ellipse(x+10,y-30,8,7,0.5,0,Math.PI*2); ctx.fill(); }
+        }
+        function drawKorzhik(ctx,x,y){ drawCharacter(ctx,x,y,"#6CA6CD"); }
+        function drawKompot(ctx,x,y){ drawCharacter(ctx,x,y,"#6B8E23",true); }
+        function drawGonya(ctx,x,y){ drawCharacter(ctx,x,y,"#808080"); }
+        function drawKaramelka(ctx,x,y){ drawCharacter(ctx,x,y,"#CD5C5C",true); }
+        function drawGorchitsa(ctx,x,y){ drawCharacter(ctx,x,y,"#2C2C2C"); }
+        
+        const drawFunctions = [drawKorzhik, drawKompot, drawGonya, drawKaramelka, drawGorchitsa];
+        const charNames = ["КОРЖИК", "КОМПОТ", "ГОНЯ", "КАРАМЕЛЬКА", "ГОРЧИЦА"];
+        
+        const screens = { main:document.getElementById('mainMenu'), char:document.getElementById('charScreen'), shop:document.getElementById('shopScreen'), titles:document.getElementById('titlesScreen'), glory:document.getElementById('gloryScreen'), game:document.getElementById('gameScreen') };
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let selectedChar=0, botChar=0, playerScore=0, botScore=0, gameActive=false, gameFinished=false, animationId=null, isRespawning=false, isExiting=false;
+        const W=650, H=850, PADDLE_RADIUS=38, PUCK_RADIUS=24, GOAL_WIDTH=200, TOP_GOAL_X=(W-GOAL_WIDTH)/2, BOTTOM_GOAL_X=(W-GOAL_WIDTH)/2;
+        const PLAYER_BOUNDS={ minX:25+PADDLE_RADIUS, maxX:W-25-PADDLE_RADIUS, minY:H/2+25+PADDLE_RADIUS, maxY:H-25-PADDLE_RADIUS };
+        const BOT_BOUNDS={ minX:25+PADDLE_RADIUS, maxX:W-25-PADDLE_RADIUS, minY:25+PADDLE_RADIUS, maxY:H/2-25-PADDLE_RADIUS };
+        let playerPaddle={ x:W/2, y:H-90 }, botPaddle={ x:W/2, y:90 }, mouseX=W/2, mouseY=H-90, puck={ x:W/2, y:H/2, vx:0, vy:0 };
+        
+        let baseBotSpeed={ easy:0.045, medium:0.09, hard:0.14 };
+        function getBotSpeedMultiplier() { let elo=ratings[selectedChar]; if(elo>=1500) return 3.0; if(elo>=1000) return 2.0; return 1.0; }
+        function getBotSpeed() { let mult=getBotSpeedMultiplier(); let extra=(difficulty==='hard')?2.5:1; return baseBotSpeed[difficulty]*mult*extra; }
+        function getBotErrorChance() { let elo=ratings[selectedChar]; let err={ easy:0.25, medium:0.05, hard:0 }[difficulty]; if(elo>=1500) err=Math.max(0,err-0.1); else if(elo>=1000) err=Math.max(0,err-0.05); return err; }
+        
+        function checkStuckPuck() {
+            let now = Date.now();
+            if (Math.abs(puck.x - lastPuckPos.x) < 5 && Math.abs(puck.y - lastPuckPos.y) < 5 && Math.abs(puck.vx) < 0.5 && Math.abs(puck.vy) < 0.5) {
+                if (now - lastStuckCheck > 1000) {
+                    stuckCount++;
+                    lastStuckCheck = now;
+                    if (stuckCount >= 2) {
+                        kickReset();
+                        stuckCount = 0;
+                    }
+                }
+            } else {
+                stuckCount = 0;
+            }
+            lastPuckPos = { x: puck.x, y: puck.y };
         }
         
         function renderCharacters() {
-            const grid = document.getElementById('charsGrid');
-            grid.innerHTML = '';
-            for (let i = 0; i < 4; i++) {
-                const div = document.createElement('div');
-                div.className = 'char' + (i === selectedChar ? ' selected' : '');
-                div.innerHTML = `
-                    <div class="char-avatar">${CHARACTERS[i].emoji}</div>
-                    <div class="char-name">${CHARACTERS[i].name}</div>
-                    <div class="char-rating">⭐ ЭЛО: ${ratings[i]}</div>
-                `;
-                div.onclick = () => { selectedChar = i; renderCharacters(); };
+            const grid=document.getElementById('charsGrid');
+            const hasGorchitsa = ownedTitles.includes('gorchitsa');
+            grid.className = 'chars-grid';
+            grid.innerHTML='';
+            const availableChars = hasGorchitsa ? 5 : 4;
+            let order = [];
+            if (hasGorchitsa) {
+                order = [0, 1, 2, 3, 4];
+            } else {
+                order = [0, 1, 2, 3];
+            }
+            for(let idx=0; idx<availableChars; idx++){
+                let i = order[idx];
+                const tempCanvas=document.createElement('canvas'); tempCanvas.width=90; tempCanvas.height=90;
+                drawFunctions[i](tempCanvas.getContext('2d'),45,45);
+                const div=document.createElement('div'); 
+                div.className='char'+(i===selectedChar?' selected':'')+(ratings[i]>=MAX_ELO?' gray':'');
+                let eloInfo = '';
+                let playerElo = ratings[selectedChar];
+                if(i===selectedChar){
+                    let base = baseEloPerGoal[difficulty];
+                    let actual = getEloPerGoal();
+                    if(playerElo>=1500) eloInfo=`<div class="char-elo-info">⚡ ЭЛИТА: ${actual} ЭЛО/ГОЛ (было ${base})</div>`;
+                    else if(playerElo>=1000) eloInfo=`<div class="char-elo-info">⭐ ПРОФИ: ${actual} ЭЛО/ГОЛ (было ${base})</div>`;
+                    else eloInfo=`<div class="char-elo-info">📈 ${actual} ЭЛО/ГОЛ</div>`;
+                }
+                let primeBadge = ratings[i] >= MAX_ELO ? '<div class="prime-badge">🌟 В ПРАЙМЕ 🌟</div>' : '';
+                div.innerHTML=`<canvas class="char-canvas" width="90" height="90"></canvas><div class="char-name">${charNames[i]}</div><div class="char-rating">⭐ ЭЛО: ${ratings[i]}</div>${primeBadge}${eloInfo}`;
+                div.querySelector('canvas').getContext('2d').drawImage(tempCanvas,0,0);
+                div.onclick=()=>{ selectedChar=i; renderCharacters(); };
                 grid.appendChild(div);
             }
         }
         
-        function renderShop() {
-            const container = document.getElementById('shopItems');
-            const primeOwned = ownedTitles.includes('prime');
-            container.innerHTML = `
-                <div class="shop-item ${primeOwned ? 'owned' : ''}">
-                    <div style="font-size: 3rem;">🏆</div>
-                    <div><strong>ТИТУЛ "НАСТОЯЩИЙ ЧЕМПИОН"</strong></div>
-                    <div>+5 ЭЛО за гол, -5 ЭЛО за пропущенный</div>
-                    <div>💰 75 МОНЕТ</div>
-                    ${primeOwned ? '<div>✅ КУПЛЕНО</div>' : '<button id="buyPrimeBtn" class="menu-btn" style="font-size:0.8rem; padding:5px 10px;">КУПИТЬ</button>'}
-                </div>
-            `;
-            const buyBtn = document.getElementById('buyPrimeBtn');
-            if (buyBtn) {
-                buyBtn.onclick = () => {
-                    if (coins >= 75 && !ownedTitles.includes('prime')) {
-                        coins -= 75;
-                        ownedTitles.push('prime');
-                        saveData();
-                        updateStats();
-                        renderShop();
-                        renderTitles();
-                        alert('🎉 Титул куплен!');
-                    } else alert('Недостаточно монет!');
-                };
-            }
-        }
-        
-        function renderTitles() {
-            const container = document.getElementById('titlesItems');
-            if (ownedTitles.length === 0) {
-                container.innerHTML = '<div style="padding:20px;">😢 Нет титулов</div>';
-                return;
-            }
-            container.innerHTML = ownedTitles.map(title => `
-                <div class="shop-item ${activeTitle === title ? 'active-title' : ''}">
-                    <div style="font-size: 3rem;">🏆</div>
-                    <div><strong>${title === 'prime' ? 'НАСТОЯЩИЙ ЧЕМПИОН' : title}</strong></div>
-                    <div>${title === 'prime' ? '+5 ЭЛО за гол, -5 ЭЛО за пропущенный' : ''}</div>
-                    <button class="apply-title-btn menu-btn" style="font-size:0.8rem; padding:5px 10px;">${activeTitle === title ? '✅ АКТИВЕН' : '🔹 ПРИМЕНИТЬ'}</button>
-                </div>
-            `).join('');
-            document.querySelectorAll('.apply-title-btn').forEach((btn, i) => {
-                btn.onclick = () => {
-                    activeTitle = ownedTitles[i];
-                    saveData();
-                    renderTitles();
-                    alert('Титул активирован!');
-                };
-            });
-        }
-        
-        // ==================== ИГРОВЫЕ ПЕРЕМЕННЫЕ ====================
-        let playerScore = 0, botScore = 0;
-        let gameActive = false;
-        let animationId = null;
-        
-        const W = 550, H = 800;
-        const PADDLE_R = 28;
-        const PUCK_R = 16;
-        const GOAL_WIDTH = 180;
-        const TOP_GOAL_X = (W - GOAL_WIDTH) / 2;
-        const BOTTOM_GOAL_X = (W - GOAL_WIDTH) / 2;
-        
-        const PLAYER_AREA = { minX: 25 + PADDLE_R, maxX: W - 25 - PADDLE_R, minY: H/2 + 30, maxY: H - 30 };
-        const BOT_AREA = { minX: 25 + PADDLE_R, maxX: W - 25 - PADDLE_R, minY: 30, maxY: H/2 - 30 };
-        
-        let playerPaddle = { x: W/2, y: H - 80 };
-        let botPaddle = { x: W/2, y: 80 };
-        let mouseX = W/2, mouseY = H - 80;
-        let puck = { x: W/2, y: H/2, vx: 0, vy: 0 };
-        
-        let botSpeed = 0.09;
-        let botError = 0.05;
-        
-        let lastTimestamp = 0;
-        let deltaTime = 1 / 60;
-        
-        let keys = { w: false, s: false, a: false, d: false };
-        
-        function setDifficulty(level) {
-            difficulty = level;
-            if (level === 'easy') { botSpeed = 0.045; botError = 0.25; }
-            else if (level === 'medium') { botSpeed = 0.09; botError = 0.05; }
-            else { botSpeed = 0.14; botError = 0; }
+        function updateSafeExitButton() { 
+            const safeBtn = document.getElementById('safeExitGameBtn');
+            safeBtn.style.display = (safeExitUnlocked && adminAuthenticated) ? 'block' : 'none';
         }
         
         function startGame() {
-            let available = [0,1,2,3].filter(i => i !== selectedChar);
-            botChar = available[Math.floor(Math.random() * available.length)];
-            playerScore = 0; botScore = 0;
-            document.getElementById('playerScore').innerText = "0";
-            document.getElementById('botScore').innerText = "0";
-            document.getElementById('playerName').innerHTML = CHARACTERS[selectedChar].name;
-            document.getElementById('botName').innerHTML = CHARACTERS[botChar].name;
-            
-            document.getElementById('gameScreen').style.display = 'block';
-            document.getElementById('charScreen').style.display = 'none';
-            gameActive = true;
-            
-            puck.x = W/2; puck.y = H/2;
-            puck.vx = (Math.random() - 0.5) * 4;
-            puck.vy = (Math.random() - 0.5) * 4;
-            playerPaddle.x = W/2; playerPaddle.y = H - 80;
-            botPaddle.x = W/2; botPaddle.y = 80;
-            mouseX = W/2; mouseY = H - 80;
+            ludomanUsed = false;
+            let available = [];
+            for(let i=0;i<(ownedTitles.includes('gorchitsa')?5:4);i++) {
+                if(i!==selectedChar) available.push(i);
+            }
+            botChar=available[Math.floor(Math.random()*available.length)];
+            playerScore=0; botScore=0;
+            document.getElementById('playerName').innerHTML=charNames[selectedChar];
+            document.getElementById('botName').innerHTML=charNames[botChar];
+            let bonusText = getTitleBonusPerGoal() > 0 ? `✨ +${getTitleBonusPerGoal()} ЭЛО/ГОЛ` : '';
+            let penaltyText = getTitlePenaltyPerGoal() < 0 ? ` 💔 ${getTitlePenaltyPerGoal()} ЭЛО/ПРОПУЩЕННЫЙ` : '';
+            if(activeTitle === 'ludoman') bonusText += ' 🎲 ЛУДОМАН (10% в начале)';
+            document.getElementById('titleBonus').innerHTML = bonusText + penaltyText;
+            document.getElementById('botDifficulty').innerHTML={easy:'🟢 ЛЕГКИЙ',medium:'🟡 СРЕДНИЙ',hard:'🔴 ТРУДНЫЙ'}[difficulty];
+            updateSafeExitButton();
+            screens.game.style.display='block'; screens.char.style.display='none';
+            gameActive=true; gameFinished=false; isRespawning=false; isExiting=false; cornerHitCount=0; stuckCount=0;
+            puck.x=W/2; puck.y=H/2; puck.vx=(Math.random()-0.5)*5; puck.vy=(Math.random()>0.5?4:-4);
+            playerPaddle.x=W/2; playerPaddle.y=H-90; botPaddle.x=W/2; botPaddle.y=90;
+            mouseX=W/2; mouseY=H-90;
             lastTimestamp = 0;
+            if(animationId) cancelAnimationFrame(animationId);
+            animationId=requestAnimationFrame(gameLoop);
             
-            if (animationId) cancelAnimationFrame(animationId);
-            animationId = requestAnimationFrame(gameLoop);
+            setTimeout(() => {
+                if(gameActive && !gameFinished && !isExiting) {
+                    checkLudomanEffect();
+                }
+            }, 100);
         }
         
-        function endGame() {
-            gameActive = false;
-            if (animationId) cancelAnimationFrame(animationId);
-            
-            let diff = playerScore - botScore;
-            let gain = diff * (difficulty === 'easy' ? 10 : difficulty === 'medium' ? 20 : 30);
-            ratings[selectedChar] += gain;
-            saveData();
-            updateStats();
-            
-            let msg = playerScore > botScore ? '🏆 ПОБЕДА! 🏆' : (playerScore < botScore ? '😭 ПОРАЖЕНИЕ... 😭' : '🤝 НИЧЬЯ 🤝');
-            document.getElementById('resultText').innerHTML = `${msg}<br>${playerScore} : ${botScore}<br>${gain >= 0 ? '+' : ''}${gain} ЭЛО`;
-            document.getElementById('resultPanel').style.display = 'flex';
+        function checkCornerHit() {
+            let isCorner=false;
+            if((puck.x-PUCK_RADIUS<=5 && puck.y-PUCK_RADIUS<=5) || (puck.x+PUCK_RADIUS>=W-5 && puck.y-PUCK_RADIUS<=5) ||
+               (puck.x-PUCK_RADIUS<=5 && puck.y+PUCK_RADIUS>=H-5) || (puck.x+PUCK_RADIUS>=W-5 && puck.y+PUCK_RADIUS>=H-5)) isCorner=true;
+            if(isCorner && Date.now()-lastCornerHitTime>800){ cornerHitCount++; lastCornerHitTime=Date.now(); }
+            if(cornerHitCount>=3){ cornerHitCount=0; kickReset(); }
         }
         
-        function scoreGoal(who) {
-            if (!gameActive) return;
-            if (who === 'player') playerScore++;
-            else botScore++;
-            document.getElementById('playerScore').innerText = playerScore;
-            document.getElementById('botScore').innerText = botScore;
-            
-            if (playerScore >= 5 || botScore >= 5) { endGame(); return; }
-            
-            const flash = document.createElement('div');
-            flash.className = 'goal-flash';
-            document.getElementById('gameScreen').appendChild(flash);
-            setTimeout(() => flash.remove(), 500);
-            
-            puck.x = W/2; puck.y = H/2;
-            puck.vx = (Math.random() - 0.5) * 4;
-            puck.vy = (Math.random() - 0.5) * 4;
-        }
+        function kickReset() { if(gameActive && !gameFinished && !isRespawning && !isExiting) { puck.x=W/2; puck.y=H/2; puck.vx=(Math.random()-0.5)*6; puck.vy=(Math.random()-0.5)*6; } }
         
-        function updateBot(dt) {
-            if (!gameActive) return;
-            let targetX = puck.x, targetY = puck.y;
-            targetX = Math.max(BOT_AREA.minX + 15, Math.min(BOT_AREA.maxX - 15, targetX));
-            targetY = Math.max(BOT_AREA.minY + 15, Math.min(BOT_AREA.maxY - 15, targetY));
-            let dx = targetX - botPaddle.x, dy = targetY - botPaddle.y;
-            if (Math.random() < botError) { dx *= 0.6; dy *= 0.6; }
-            botPaddle.x += Math.min(6, Math.max(-6, dx * botSpeed * (dt * 60)));
-            botPaddle.y += Math.min(6, Math.max(-6, dy * botSpeed * (dt * 60)));
-            botPaddle.x = Math.max(BOT_AREA.minX, Math.min(BOT_AREA.maxX, botPaddle.x));
-            botPaddle.y = Math.max(BOT_AREA.minY, Math.min(BOT_AREA.maxY, botPaddle.y));
-        }
-        
-        function updateKeyboardMovement() {
-            let speed = 7;
-            if (keys.w) mouseY -= speed;
-            if (keys.s) mouseY += speed;
-            if (keys.a) mouseX -= speed;
-            if (keys.d) mouseX += speed;
-            mouseX = Math.max(PLAYER_AREA.minX, Math.min(PLAYER_AREA.maxX, mouseX));
-            mouseY = Math.max(PLAYER_AREA.minY, Math.min(PLAYER_AREA.maxY, mouseY));
-        }
-        
-        function updatePhysics(dt) {
-            if (!gameActive) return;
-            puck.x += puck.vx * dt * 60;
-            puck.y += puck.vy * dt * 60;
-            
-            if (puck.x - PUCK_R <= 0) { puck.x = PUCK_R; puck.vx = -puck.vx; }
-            if (puck.x + PUCK_R >= W) { puck.x = W - PUCK_R; puck.vx = -puck.vx; }
-            
-            if (puck.y - PUCK_R <= 0) {
-                if (puck.x >= TOP_GOAL_X && puck.x <= TOP_GOAL_X + GOAL_WIDTH) { scoreGoal('player'); return; }
-                else { puck.y = PUCK_R; puck.vy = -puck.vy; }
+        function endGame(isSurrender=false, isSafeExit=false){
+            gameFinished=true; gameActive=false; if(animationId) cancelAnimationFrame(animationId);
+            let totalGain=0, resultMsg="";
+            if(isSafeExit && safeExitUnlocked && adminAuthenticated) resultMsg=`🚪 БЕЗОПАСНЫЙ ВЫХОД 🚪<br>СЧЕТ: ${playerScore} : ${botScore}<br><span style="color:#8bc34a;">⚡ 0 ЭЛО ⚡</span>`;
+            else if(isSurrender){ let penalty=surrenderPenalty[difficulty]; totalGain=penalty; ratings[selectedChar]+=totalGain; applyEloLimit(); resultMsg=`🏳️ СДАЧА! 🏳️<br>СЧЕТ: ${playerScore} : ${botScore}<br><span style="color:#ff8888;">${totalGain} ЭЛО</span>`; saveData(); updateStatsDisplay(); renderCharacters(); }
+            else if(playerScore===botScore){ totalGain=drawPenalty; ratings[selectedChar]+=totalGain; applyEloLimit(); resultMsg=`🤝 НИЧЬЯ! 🤝<br>${playerScore} : ${botScore}<br><span style="color:#ffaa66;">${totalGain} ЭЛО</span>`; saveData(); updateStatsDisplay(); renderCharacters(); }
+            else{ let isWin=playerScore>botScore; let scoreDiff=playerScore-botScore; let baseElo=scoreDiff*getEloPerGoal(); let titleBonus=playerScore*getTitleBonusPerGoal(); let titlePenalty=botScore*getTitlePenaltyPerGoal(); totalGain=baseElo+titleBonus+titlePenalty; ratings[selectedChar]+=totalGain; applyEloLimit();
+                if(isWin) resultMsg=`🏆 ПОБЕДА! 🏆<br>${playerScore} : ${botScore}<br><span style="color:#8bc34a;">+${totalGain} ЭЛО</span>`+(titleBonus?`<br><span style="font-size:0.8rem;">(включая +${titleBonus} от титула)</span>`:'')+(titlePenalty?`<br><span style="font-size:0.8rem;">(включая ${titlePenalty} за пропущенные)</span>`:'');
+                else resultMsg=`😭 ПОРАЖЕНИЕ... 😭<br>${playerScore} : ${botScore}<br><span style="color:#ff8888;">${totalGain} ЭЛО</span>`;
+                saveData(); updateStatsDisplay(); renderCharacters();
             }
-            if (puck.y + PUCK_R >= H) {
-                if (puck.x >= BOTTOM_GOAL_X && puck.x <= BOTTOM_GOAL_X + GOAL_WIDTH) { scoreGoal('bot'); return; }
-                else { puck.y = H - PUCK_R; puck.vy = -puck.vy; }
-            }
-            
-            const dx1 = puck.x - playerPaddle.x, dy1 = puck.y - playerPaddle.y;
-            if (Math.hypot(dx1, dy1) < PUCK_R + PADDLE_R) {
-                const angle = Math.atan2(dy1, dx1);
-                const speed = Math.hypot(puck.vx, puck.vy);
-                const newSpeed = Math.min(12, speed + 1.5);
-                puck.vx = Math.cos(angle) * newSpeed * 1.2;
-                puck.vy = Math.sin(angle) * newSpeed * 1.2;
-                const overlap = (PUCK_R + PADDLE_R) - Math.hypot(dx1, dy1);
-                puck.x += Math.cos(angle) * overlap;
-                puck.y += Math.sin(angle) * overlap;
-            }
-            
-            const dx2 = puck.x - botPaddle.x, dy2 = puck.y - botPaddle.y;
-            if (Math.hypot(dx2, dy2) < PUCK_R + PADDLE_R) {
-                const angle = Math.atan2(dy2, dx2);
-                const speed = Math.hypot(puck.vx, puck.vy);
-                const newSpeed = Math.min(12, speed + 1.5);
-                puck.vx = Math.cos(angle) * newSpeed * 1.2;
-                puck.vy = Math.sin(angle) * newSpeed * 1.2;
-                const overlap = (PUCK_R + PADDLE_R) - Math.hypot(dx2, dy2);
-                puck.x += Math.cos(angle) * overlap;
-                puck.y += Math.sin(angle) * overlap;
-            }
-            
-            puck.x = Math.max(PUCK_R, Math.min(W - PUCK_R, puck.x));
-            puck.y = Math.max(PUCK_R, Math.min(H - PUCK_R, puck.y));
-            playerPaddle.x = mouseX;
-            playerPaddle.y = mouseY;
-            playerPaddle.x = Math.max(PLAYER_AREA.minX, Math.min(PLAYER_AREA.maxX, playerPaddle.x));
-            playerPaddle.y = Math.max(PLAYER_AREA.minY, Math.min(PLAYER_AREA.maxY, playerPaddle.y));
+            document.getElementById('resultText').innerHTML=resultMsg; document.getElementById('resultPanel').style.display='flex';
         }
         
-        function draw() {
-            ctx.clearRect(0, 0, W, H);
-            ctx.fillStyle = "#208a5e";
-            ctx.fillRect(0, 0, W, H);
-            
-            ctx.beginPath();
-            ctx.strokeStyle = "#ffefb0";
-            ctx.lineWidth = 3;
-            ctx.setLineDash([10, 15]);
-            ctx.moveTo(0, H/2);
-            ctx.lineTo(W, H/2);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            
-            ctx.beginPath();
-            ctx.arc(W/2, H/2, 45, 0, Math.PI * 2);
-            ctx.stroke();
-            
-            ctx.fillStyle = "#4a2c14cc";
-            ctx.fillRect(TOP_GOAL_X, 0, GOAL_WIDTH, 18);
-            ctx.fillStyle = "#e6bc7e";
-            ctx.fillRect(TOP_GOAL_X + 5, 2, GOAL_WIDTH - 10, 12);
-            ctx.fillStyle = "#4a2c14cc";
-            ctx.fillRect(BOTTOM_GOAL_X, H - 18, GOAL_WIDTH, 18);
-            ctx.fillStyle = "#e6bc7e";
-            ctx.fillRect(BOTTOM_GOAL_X + 5, H - 16, GOAL_WIDTH - 10, 12);
-            
-            drawCharacter(ctx, playerPaddle.x, playerPaddle.y, CHARACTERS[selectedChar].color);
-            drawCharacter(ctx, botPaddle.x, botPaddle.y, CHARACTERS[botChar].color);
-            
-            ctx.beginPath();
-            ctx.arc(puck.x, puck.y, PUCK_R, 0, Math.PI * 2);
-            ctx.fillStyle = "#2d2d2d";
-            ctx.fill();
-            ctx.fillStyle = "#c0c0c0";
-            ctx.beginPath();
-            ctx.arc(puck.x - 4, puck.y - 3, 4, 0, Math.PI * 2);
-            ctx.fill();
+        function surrender(){ if(!gameFinished && !isRespawning && !isExiting) { isExiting=true; endGame(true,false); } }
+        function safeExit(){ if(!gameFinished && !isRespawning && !isExiting && safeExitUnlocked && adminAuthenticated) { isExiting=true; endGame(false,true); } }
+        
+        function scoreGoal(who){
+            if(gameFinished || isRespawning || isExiting) return;
+            isRespawning=true; const flash=document.createElement('div'); flash.className='goal-flash'; document.getElementById('gameScreen').appendChild(flash); setTimeout(()=>flash.remove(),500);
+            if(who==='player') playerScore++; else botScore++;
+            document.getElementById('playerScore').innerText=playerScore; document.getElementById('botScore').innerText=botScore;
+            if(playerScore>=winLimit || botScore>=winLimit){ endGame(false,false); return; }
+            puck.vx=0; puck.vy=0;
+            setTimeout(()=>{
+                if(gameActive && !gameFinished && !isExiting){
+                    if(who==='player'){ puck.x=botPaddle.x; puck.y=Math.max(PUCK_RADIUS+30,Math.min(H-PUCK_RADIUS-30,botPaddle.y+50)); puck.vx=(Math.random()-0.5)*4; puck.vy=5+Math.random()*2; }
+                    else{ puck.x=playerPaddle.x; puck.y=Math.max(PUCK_RADIUS+30,Math.min(H-PUCK_RADIUS-30,playerPaddle.y-50)); puck.vx=(Math.random()-0.5)*4; puck.vy=-5-Math.random()*2; }
+                    puck.x=Math.max(PUCK_RADIUS+10,Math.min(W-PUCK_RADIUS-10,puck.x)); isRespawning=false;
+                }
+            },600);
         }
         
-        function gameLoop(timestamp) {
-            if (!gameActive) { draw(); return; }
+        function updateBotAI(dt){
+            if(!gameActive || gameFinished || isRespawning || isExiting) return;
+            let targetX=puck.x, targetY=puck.y;
+            targetX=Math.max(BOT_BOUNDS.minX+15,Math.min(BOT_BOUNDS.maxX-15,targetX));
+            targetY=Math.max(BOT_BOUNDS.minY+15,Math.min(BOT_BOUNDS.maxY-15,targetY));
+            let dx=targetX-botPaddle.x, dy=targetY-botPaddle.y;
+            if(Math.random()<getBotErrorChance()){ dx*=0.6+Math.random()*0.8; dy*=0.6+Math.random()*0.8; }
+            let speed=getBotSpeed();
+            // Движение бота привязано к времени
+            botPaddle.x+=Math.min(7,Math.max(-7,dx*speed*(dt*60)));
+            botPaddle.y+=Math.min(7,Math.max(-7,dy*speed*(dt*60)));
+            botPaddle.x=Math.max(BOT_BOUNDS.minX,Math.min(BOT_BOUNDS.maxX,botPaddle.x));
+            botPaddle.y=Math.max(BOT_BOUNDS.minY,Math.min(BOT_BOUNDS.maxY,botPaddle.y));
+        }
+        
+        function updatePhysics(dt){
+            if(!gameActive || gameFinished || isRespawning || isExiting) return;
+            // Движение шайбы привязано к времени
+            puck.x+=puck.vx * dt * 60;
+            puck.y+=puck.vy * dt * 60;
+            
+            if(puck.x-PUCK_RADIUS<=2){ puck.x=PUCK_RADIUS+2; puck.vx=-puck.vx*0.98; checkCornerHit(); }
+            if(puck.x+PUCK_RADIUS>=W-2){ puck.x=W-PUCK_RADIUS-2; puck.vx=-puck.vx*0.98; checkCornerHit(); }
+            if(puck.y-PUCK_RADIUS<=0){ if(puck.x>=TOP_GOAL_X && puck.x<=TOP_GOAL_X+GOAL_WIDTH){ scoreGoal('player'); return; } else{ puck.y=PUCK_RADIUS; puck.vy=-puck.vy*0.95; checkCornerHit(); } }
+            if(puck.y+PUCK_RADIUS>=H){ if(puck.x>=BOTTOM_GOAL_X && puck.x<=BOTTOM_GOAL_X+GOAL_WIDTH){ scoreGoal('bot'); return; } else{ puck.y=H-PUCK_RADIUS; puck.vy=-puck.vy*0.95; checkCornerHit(); } }
+            [playerPaddle,botPaddle].forEach(p=>{
+                const dx=puck.x-p.x, dy=puck.y-p.y;
+                if(Math.hypot(dx,dy)<PUCK_RADIUS+PADDLE_RADIUS){
+                    const angle=Math.atan2(dy,dx); const speed=Math.hypot(puck.vx,puck.vy);
+                    puck.vx=Math.cos(angle)*Math.min(13,speed+1.5)*1.2; puck.vy=Math.sin(angle)*Math.min(13,speed+1.5)*1.2;
+                    const overlap=(PUCK_RADIUS+PADDLE_RADIUS)-Math.hypot(dx,dy);
+                    puck.x+=Math.cos(angle)*overlap; puck.y+=Math.sin(angle)*overlap;
+                }
+            });
+            puck.x=Math.max(PUCK_RADIUS+2,Math.min(W-PUCK_RADIUS-2,puck.x));
+            puck.y=Math.max(PUCK_RADIUS+2,Math.min(H-PUCK_RADIUS-2,puck.y));
+            checkStuckPuck();
+            playerPaddle.x=mouseX; playerPaddle.y=mouseY;
+            playerPaddle.x=Math.max(PLAYER_BOUNDS.minX,Math.min(PLAYER_BOUNDS.maxX,playerPaddle.x));
+            playerPaddle.y=Math.max(PLAYER_BOUNDS.minY,Math.min(PLAYER_BOUNDS.maxY,playerPaddle.y));
+        }
+        
+        function draw(){
+            ctx.clearRect(0,0,W,H); ctx.fillStyle="#208a5e"; ctx.fillRect(0,0,W,H);
+            ctx.beginPath(); ctx.strokeStyle="#ffefb0"; ctx.lineWidth=3; ctx.setLineDash([10,15]); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke(); ctx.setLineDash([]);
+            ctx.beginPath(); ctx.arc(W/2,H/2,55,0,Math.PI*2); ctx.strokeStyle="#ffefb0"; ctx.stroke();
+            ctx.fillStyle="#4a2c14cc"; ctx.fillRect(TOP_GOAL_X,0,GOAL_WIDTH,22); ctx.fillStyle="#e6bc7e"; ctx.fillRect(TOP_GOAL_X+5,3,GOAL_WIDTH-10,16);
+            ctx.fillStyle="#4a2c14cc"; ctx.fillRect(BOTTOM_GOAL_X,H-22,GOAL_WIDTH,22); ctx.fillStyle="#e6bc7e"; ctx.fillRect(BOTTOM_GOAL_X+5,H-19,GOAL_WIDTH-10,16);
+            drawFunctions[selectedChar](ctx,playerPaddle.x,playerPaddle.y); drawFunctions[botChar](ctx,botPaddle.x,botPaddle.y);
+            ctx.shadowBlur=8; ctx.beginPath(); ctx.arc(puck.x,puck.y,PUCK_RADIUS,0,Math.PI*2); ctx.fillStyle="#2d2d2d"; ctx.fill(); ctx.fillStyle="#c0c0c0"; ctx.beginPath(); ctx.arc(puck.x-6,puck.y-5,6,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
+        }
+        
+        function gameLoop(timestamp){
+            if(!gameActive || gameFinished || isExiting){ draw(); return; }
+            
+            // Delta Time вычисление
             if (lastTimestamp === 0) lastTimestamp = timestamp;
             let dt = Math.min(0.033, (timestamp - lastTimestamp) / 1000);
             lastTimestamp = timestamp;
             if (dt < 0.005) dt = 0.016;
             
-            updateKeyboardMovement();
-            updateBot(dt);
+            updateBotAI(dt);
             updatePhysics(dt);
             draw();
             
             animationId = requestAnimationFrame(gameLoop);
         }
         
-        function handleMouseMove(e) {
-            if (!gameActive) return;
-            const rect = canvas.getBoundingClientRect();
-            let y = ((e.touches ? e.touches[0].clientY : e.clientY) - rect.top) * (canvas.height / rect.height);
-            let x = ((e.touches ? e.touches[0].clientX : e.clientX) - rect.left) * (canvas.width / rect.width);
-            mouseX = Math.max(PLAYER_AREA.minX, Math.min(PLAYER_AREA.maxX, x));
-            mouseY = Math.max(PLAYER_AREA.minY, Math.min(PLAYER_AREA.maxY, y));
-            if (e.touches) e.preventDefault();
+        function updateKeyboardMovement() {
+            let step = 12;
+            let newX = mouseX, newY = mouseY;
+            if (keysPressed.ArrowUp || keysPressed.w) newY -= step;
+            if (keysPressed.ArrowDown || keysPressed.s) newY += step;
+            if (keysPressed.ArrowLeft || keysPressed.a) newX -= step;
+            if (keysPressed.ArrowRight || keysPressed.d) newX += step;
+            mouseX = Math.max(PLAYER_BOUNDS.minX, Math.min(PLAYER_BOUNDS.maxX, newX));
+            mouseY = Math.max(PLAYER_BOUNDS.minY, Math.min(PLAYER_BOUNDS.maxY, newY));
         }
         
-        function kickReset() { if (gameActive) { puck.x = W/2; puck.y = H/2; puck.vx = (Math.random()-0.5)*5; puck.vy = (Math.random()-0.5)*5; } }
-        
         function handleKeyDown(e) {
-            const key = e.key.toLowerCase();
-            if (key === 'w' || key === 'arrowup') keys.w = true;
-            if (key === 's' || key === 'arrowdown') keys.s = true;
-            if (key === 'a' || key === 'arrowleft') keys.a = true;
-            if (key === 'd' || key === 'arrowright') keys.d = true;
-            if (key === 'r') { kickReset(); e.preventDefault(); }
-            if (key === 'f') { if (gameActive) endGame(); e.preventDefault(); }
+            const key = e.key;
+            if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight' ||
+                key === 'w' || key === 's' || key === 'a' || key === 'd') {
+                keysPressed[key] = true;
+                e.preventDefault();
+            }
+            if (key === 'r' || key === 'R') { kickReset(); e.preventDefault(); }
+            if (key === 'f' || key === 'F') { if(!gameFinished && !isExiting) surrender(); e.preventDefault(); }
         }
         
         function handleKeyUp(e) {
-            const key = e.key.toLowerCase();
-            if (key === 'w' || key === 'arrowup') keys.w = false;
-            if (key === 's' || key === 'arrowdown') keys.s = false;
-            if (key === 'a' || key === 'arrowleft') keys.a = false;
-            if (key === 'd' || key === 'arrowright') keys.d = false;
+            const key = e.key;
+            if (keysPressed.hasOwnProperty(key)) { keysPressed[key] = false; e.preventDefault(); }
         }
         
-        // ==================== НАВИГАЦИЯ ====================
-        document.getElementById('startMenuBtn').onclick = () => {
-            document.getElementById('mainMenu').style.display = 'none';
-            document.getElementById('charScreen').style.display = 'block';
-            renderCharacters();
-        };
+        function handleMouseMove(e){
+            if(!gameActive || gameFinished || isRespawning || isExiting) return;
+            const rect=canvas.getBoundingClientRect(); const scaleX=canvas.width/rect.width, scaleY=canvas.height/rect.height;
+            let cx=e.clientX, cy=e.clientY;
+            if(e.touches){ cx=e.touches[0].clientX; cy=e.touches[0].clientY; e.preventDefault(); }
+            let x=(cx-rect.left)*scaleX, y=(cy-rect.top)*scaleY;
+            mouseX=Math.max(PLAYER_BOUNDS.minX,Math.min(PLAYER_BOUNDS.maxX,x));
+            mouseY=Math.max(PLAYER_BOUNDS.minY,Math.min(PLAYER_BOUNDS.maxY,y));
+        }
         
-        document.getElementById('shopMenuBtn').onclick = () => {
-            document.getElementById('mainMenu').style.display = 'none';
-            document.getElementById('shopScreen').style.display = 'block';
-            renderShop();
-        };
+        function showScreen(id){ Object.values(screens).forEach(s=>s.style.display='none'); screens[id].style.display='block'; }
         
-        document.getElementById('titlesMenuBtn').onclick = () => {
-            document.getElementById('mainMenu').style.display = 'none';
-            document.getElementById('titlesScreen').style.display = 'block';
-            renderTitles();
-        };
+        function renderShop(){
+            const container=document.getElementById('shopItems');
+            const primeOwned=ownedTitles.includes('prime');
+            const ludomanOwned=ownedTitles.includes('ludoman');
+            const gorchitsaOwned=ownedTitles.includes('gorchitsa');
+            const canBuyGorchitsa = primeOwned && ludomanOwned;
+            container.innerHTML=`
+                <div class="shop-item ${primeOwned?'owned':''}"><div style="font-size:3rem;">🏆</div><div><strong>ТИТУЛ "НАСТОЯЩИЙ ЧЕМПИОН"</strong></div><div>+5 ЭЛО за гол, -5 ЭЛО за пропущенный</div><div>💰 75 МОНЕТ</div>${primeOwned?'<div>✅ КУПЛЕНО</div>':'<button class="buy-btn prime">КУПИТЬ</button>'}</div>
+                <div class="shop-item ${ludomanOwned?'owned':''}"><div style="font-size:3rem;">🎲</div><div><strong>ТИТУЛ "ЛУДОМАН"</strong></div><div>10% шанс в начале матча на 5:0</div><div>💰 75 МОНЕТ</div>${ludomanOwned?'<div>✅ КУПЛЕНО</div>':'<button class="buy-btn ludoman">КУПИТЬ</button>'}</div>
+                <div class="shop-item ${gorchitsaOwned?'owned':(canBuyGorchitsa?'':'locked')}"><div style="font-size:3rem;">🌭</div><div><strong>ПЕРСОНАЖ "ГОРЧИЦА"</strong></div><div>Новый черный персонаж!</div><div>💰 10 МОНЕТ</div>${!canBuyGorchitsa?'<div>🔒 ТРЕБУЮТСЯ ДРУГИЕ ТИТУЛЫ</div>':(gorchitsaOwned?'<div>✅ КУПЛЕНО</div>':'<button class="buy-btn gorchitsa">КУПИТЬ</button>')}</div>`;
+            const primeBtn=container.querySelector('.buy-btn.prime');
+            if(primeBtn) primeBtn.onclick=()=>{ if(coins>=75 && !ownedTitles.includes('prime')){ coins-=75; ownedTitles.push('prime'); saveData(); updateStatsDisplay(); renderShop(); renderTitles(); renderCharacters(); alert('🎉 Титул "НАСТОЯЩИЙ ЧЕМПИОН" куплен!'); } else alert('Недостаточно монет или уже куплено!'); };
+            const ludomanBtn=container.querySelector('.buy-btn.ludoman');
+            if(ludomanBtn) ludomanBtn.onclick=()=>{ if(coins>=75 && !ownedTitles.includes('ludoman')){ coins-=75; ownedTitles.push('ludoman'); saveData(); updateStatsDisplay(); renderShop(); renderTitles(); renderCharacters(); alert('🎲 Титул "ЛУДОМАН" куплен!'); } else alert('Недостаточно монет или уже куплено!'); };
+            const gorchitsaBtn=container.querySelector('.buy-btn.gorchitsa');
+            if(gorchitsaBtn) gorchitsaBtn.onclick=()=>{ if(coins>=10 && !ownedTitles.includes('gorchitsa') && canBuyGorchitsa){ coins-=10; ownedTitles.push('gorchitsa'); saveData(); updateStatsDisplay(); renderShop(); renderTitles(); renderCharacters(); alert('🌭 Персонаж "ГОРЧИЦА" добавлен!'); } else alert('Нужно купить другие титулы или недостаточно монет!'); };
+        }
         
-        document.getElementById('gloryMenuBtn').onclick = () => {
-            document.getElementById('mainMenu').style.display = 'none';
-            document.getElementById('gloryScreen').style.display = 'block';
-            updateStats();
-        };
+        function renderTitles(){
+            const container=document.getElementById('titlesItems');
+            const titleList = ownedTitles.filter(t=>t!=='gorchitsa');
+            if(!titleList.length){ container.innerHTML='<div style="padding:20px;">😢 Нет титулов. Купите в магазине!</div>'; return; }
+            container.innerHTML=titleList.map(t=>{
+                let name = t==='prime'?'НАСТОЯЩИЙ ЧЕМПИОН':'ЛУДОМАН';
+                let desc = t==='prime'?'+5 ЭЛО/ГОЛ, -5 ЭЛО/ПРОПУЩЕННЫЙ':'10% шанс в начале матча на 5:0';
+                return `<div class="shop-item ${activeTitle===t?'active-title':''}">
+                    <div style="font-size:3rem;">${t==='prime'?'🏆':'🎲'}</div>
+                    <div><strong>${name}</strong></div>
+                    <div>${desc}</div>
+                    <div class="title-actions">
+                        <button class="apply-title-btn">${activeTitle===t?'✅ АКТИВЕН':'🔹 ПРИМЕНИТЬ'}</button>
+                        <button class="sell-btn" data-title="${t}">💰 ПРОДАТЬ</button>
+                        ${activeTitle===t ? '<button class="deactivate-btn">🔓 ДЕАКТИВИРОВАТЬ</button>' : ''}
+                    </div>
+                </div>`;
+            }).join('');
+            container.querySelectorAll('.apply-title-btn').forEach((btn,i)=>{
+                let title = titleList[i];
+                btn.onclick=()=>{ activeTitle=title; saveData(); renderTitles(); alert(`🏆 Титул "${title==='prime'?'НАСТОЯЩИЙ ЧЕМПИОН':'ЛУДОМАН'}" активирован!`); };
+            });
+            container.querySelectorAll('.sell-btn').forEach(btn=>{ btn.onclick=()=>{ let title=btn.dataset.title; sellTitle(title); }; });
+            container.querySelectorAll('.deactivate-btn').forEach(btn=>{ btn.onclick=()=>{ deactivateTitle(); }; });
+        }
         
-        document.getElementById('backToMainBtn').onclick = () => {
-            document.getElementById('charScreen').style.display = 'none';
-            document.getElementById('mainMenu').style.display = 'block';
-        };
+        function updateGlory(){ updateGloryDisplay(); }
         
-        document.getElementById('backFromShopBtn').onclick = () => {
-            document.getElementById('shopScreen').style.display = 'none';
-            document.getElementById('mainMenu').style.display = 'block';
-        };
+        function showAdminAuth(){ let pwd=prompt("Введите пароль:"); if(pwd==="838995"){ adminAuthenticated=true; document.getElementById('adminPanel').classList.add('show'); updateSafeExitButton(); } else alert("Неверный пароль!"); }
+        function closeAdminPanel(){ adminAuthenticated=false; document.getElementById('adminPanel').classList.remove('show'); updateSafeExitButton(); }
+        function unlockSafeExit(){ safeExitUnlocked=true; saveData(); updateSafeExitButton(); alert("✅ Безопасный выход разблокирован!"); }
         
-        document.getElementById('backFromTitlesBtn').onclick = () => {
-            document.getElementById('titlesScreen').style.display = 'none';
-            document.getElementById('mainMenu').style.display = 'block';
-        };
+        // Анимация движения с клавиатуры (вызывается постоянно)
+        function animateMovement() {
+            if (gameActive && !gameFinished && !isRespawning && !isExiting) updateKeyboardMovement();
+            requestAnimationFrame(animateMovement);
+        }
         
-        document.getElementById('backFromGloryBtn').onclick = () => {
-            document.getElementById('gloryScreen').style.display = 'none';
-            document.getElementById('mainMenu').style.display = 'block';
-        };
+        document.getElementById('startMenuBtn').onclick=()=>{ renderCharacters(); showScreen('char'); };
+        document.getElementById('shopMenuBtn').onclick=()=>{ renderShop(); showScreen('shop'); };
+        document.getElementById('titlesMenuBtn').onclick=()=>{ renderTitles(); showScreen('titles'); };
+        document.getElementById('gloryMenuBtn').onclick=()=>{ updateGlory(); showScreen('glory'); };
+        document.getElementById('resetStatsMainBtn').onclick=()=>{ if(confirm("Сбросить всё?")) resetAllStats(); };
+        document.getElementById('adminPanelBtn').onclick=showAdminAuth;
+        document.getElementById('adminPlus100Elo').onclick=()=>{ if(adminAuthenticated) addEloToChar(100); };
+        document.getElementById('adminPlus500Elo').onclick=()=>{ if(adminAuthenticated) addEloToChar(500); };
+        document.getElementById('adminPlus1000Elo').onclick=()=>{ if(adminAuthenticated) addEloToChar(1000); };
+        document.getElementById('adminMinusBtn').onclick=()=>{ if(adminAuthenticated) addEloToChar(-100); };
+        document.getElementById('adminPlusCoins').onclick=()=>{ if(adminAuthenticated) addCoins(100); };
+        document.getElementById('adminSafeExitBtn').onclick=()=>{ if(adminAuthenticated) unlockSafeExit(); };
+        document.getElementById('adminExitBtn').onclick=closeAdminPanel;
+        document.getElementById('backToMainBtn').onclick=()=>showScreen('main');
+        document.getElementById('backFromShopBtn').onclick=()=>showScreen('main');
+        document.getElementById('backFromTitlesBtn').onclick=()=>showScreen('main');
+        document.getElementById('backFromGloryBtn').onclick=()=>showScreen('main');
+        document.getElementById('collectCoinsBtn').onclick=collectCoins;
+        document.getElementById('startGameBtn').onclick=startGame;
+        document.getElementById('exitGameBtn').onclick=()=>{ if(!gameFinished && !isExiting) surrender(); };
+        document.getElementById('safeExitGameBtn').onclick=()=>{ if(!gameFinished && !isExiting) safeExit(); };
+        document.getElementById('kickBtn').onclick=()=>{ if(gameActive && !gameFinished && !isRespawning && !isExiting) kickReset(); };
+        document.getElementById('nextBtn').onclick=()=>{ document.getElementById('resultPanel').style.display='none'; showScreen('main'); };
+        document.getElementById('easyBtn').onclick=()=>{ difficulty='easy'; document.querySelectorAll('.difficulty-btn').forEach(b=>b.classList.remove('active')); document.getElementById('easyBtn').classList.add('active'); renderCharacters(); };
+        document.getElementById('mediumBtn').onclick=()=>{ difficulty='medium'; document.querySelectorAll('.difficulty-btn').forEach(b=>b.classList.remove('active')); document.getElementById('mediumBtn').classList.add('active'); renderCharacters(); };
+        document.getElementById('hardBtn').onclick=()=>{ difficulty='hard'; document.querySelectorAll('.difficulty-btn').forEach(b=>b.classList.remove('active')); document.getElementById('hardBtn').classList.add('active'); renderCharacters(); };
         
-        document.getElementById('collectCoinsBtn').onclick = collectCoins;
-        document.getElementById('startGameBtn').onclick = startGame;
-        document.getElementById('kickBtn').onclick = kickReset;
-        document.getElementById('exitGameBtn').onclick = () => { if (gameActive) endGame(); };
-        document.getElementById('nextBtn').onclick = () => {
-            document.getElementById('resultPanel').style.display = 'none';
-            document.getElementById('gameScreen').style.display = 'none';
-            document.getElementById('mainMenu').style.display = 'block';
-            updateStats();
-        };
-        
-        document.getElementById('easyBtn').onclick = () => {
-            setDifficulty('easy');
-            document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('easyBtn').classList.add('active');
-        };
-        document.getElementById('mediumBtn').onclick = () => {
-            setDifficulty('medium');
-            document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('mediumBtn').classList.add('active');
-        };
-        document.getElementById('hardBtn').onclick = () => {
-            setDifficulty('hard');
-            document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('hardBtn').classList.add('active');
-        };
-        
-        // Админ-панель
-        document.getElementById('adminPanelBtn').onclick = () => {
-            document.getElementById('adminPanel').classList.toggle('show');
-        };
-        document.getElementById('adminCloseBtn').onclick = () => {
-            document.getElementById('adminPanel').classList.remove('show');
-        };
-        document.getElementById('adminPlus100Elo').onclick = () => {
-            ratings[selectedChar] += 100;
-            if (ratings[selectedChar] > 3000) ratings[selectedChar] = 3000;
-            saveData();
-            updateStats();
-            renderCharacters();
-            alert('+100 ЭЛО');
-        };
-        document.getElementById('adminPlus500Elo').onclick = () => {
-            ratings[selectedChar] += 500;
-            if (ratings[selectedChar] > 3000) ratings[selectedChar] = 3000;
-            saveData();
-            updateStats();
-            renderCharacters();
-            alert('+500 ЭЛО');
-        };
-        document.getElementById('adminMinusElo').onclick = () => {
-            ratings[selectedChar] -= 100;
-            if (ratings[selectedChar] < 0) ratings[selectedChar] = 0;
-            saveData();
-            updateStats();
-            renderCharacters();
-            alert('-100 ЭЛО');
-        };
-        document.getElementById('adminPlusCoins').onclick = () => {
-            coins += 100;
-            saveData();
-            updateStats();
-            alert('+100 МОНЕТ');
-        };
-        document.getElementById('adminSafeExit').onclick = () => {
-            safeExitUnlocked = true;
-            saveData();
-            alert('Безопасный выход разблокирован');
-        };
-        
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        canvas.addEventListener('mousemove', handleMouseMove);
-        canvas.addEventListener('touchmove', handleMouseMove, { passive: false });
-        window.addEventListener('keydown', handleKeyDown);
-        window.addEventListener('keyup', handleKeyUp);
-        
-        loadData();
-        renderCharacters();
-        setDifficulty('medium');
-        document.getElementById('mainMenu').style.display = 'block';
+        canvas.addEventListener('mousemove',handleMouseMove);
+        canvas.addEventListener('touchmove',handleMouseMove,{passive:false});
+        window.addEventListener('keydown',handleKeyDown);
+        window.addEventListener('keyup',handleKeyUp);
+        canvas.width=W; canvas.height=H;
+        loadData(); renderCharacters(); showScreen('main');
+        animateMovement();
     })();
 </script>
 </body>
