@@ -1,0 +1,21 @@
+{
+  "name": "Аэрохоккей: Три Кота",
+  "short_name": "AirHockey",
+  "description": "Аэрохоккей с персонажами Три Кота и Горчица",
+  "start_url": "/den/",
+  "display": "standalone",
+  "background_color": "#1a472a",
+  "theme_color": "#1a472a",
+  "icons": [
+    {
+      "src": "https://klinenok68.github.io/den/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://klinenok68.github.io/den/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
