@@ -66,7 +66,7 @@
 <div class="game-wrapper">
     <div id="mainMenu" class="screen main-menu">
         <h1>🍭 AIR HOCKEY 🍬</h1>
-        <div class="update-badge">📢 ОБНОВЛЕНИЕ 1.0, СБРОС СТАТИСТИКИ, ФИКС WASD (25.03)</div>
+        <div class="update-badge">📢 ОБНОВЛЕНИЕ 1.1, ФИКС БАГОВ, ПЕРЕРАБОТКА СИСТЕМЫ ЭЛО, БАФФ БОТОВ, СБРОС СТАТИСТИКИ (26.03)</div>
         <div class="stats-panel">
             <div class="stat-item">💰 МОНЕТЫ: <span id="coinsDisplay">0</span></div>
             <div class="stat-item">⭐ ОБЩЕЕ ЭЛО: <span id="totalEloDisplay">0</span><span id="prestigeDisplay" class="prestige-badge" style="display:none;"></span></div>
@@ -107,12 +107,12 @@
         <div class="buffs-info">
             🎯 БАФЫ ПЕРСОНАЖЕЙ:<br>
             🐱 КОРЖИК: +10% сила удара<br>
-            🐱 КОМПОТ: +7% размер хитбокса<br>
-            🐱 ГОНЯ: 5% шанс мгновенной победы (+5% если активен титул Лудоман)<br>
+            🐱 КОМПОТ: +15% хитбокс, -10% сила удара<br>
+            🐱 ГОНЯ: 5% шанс мгновенной победы (+5% с Лудоманом)<br>
             🐱 КАРАМЕЛЬКА: 5% шанс спасти свои ворота<br>
             🌭 ГОРЧИЦА: +10% сила удара, +5% хитбокс<br>
             🏆 ТИТУЛ "НАСТОЯЩИЙ ЧЕМПИОН": +10 ЭЛО после победы<br>
-            🎲 ТИТУЛ "ЛУДОМАН": +5% шанс 5:0 (складывается с Гоней)
+            🎲 ТИТУЛ "ЛУДОМАН": 10% шанс 5:0 в начале
         </div>
         <div class="chars-grid" id="charsGrid"></div>
         <button id="backToMainBtn" class="back-btn">🏠 В ГЛАВНОЕ МЕНЮ</button>
@@ -148,7 +148,7 @@
             <div class="score-box" id="botScore">0</div>
         </div>
         <canvas id="gameCanvas" width="650" height="850"></canvas>
-        <div class="controls-info">⌨️ УПРАВЛЕНИЕ: МЫШКА / WASD / СТРЕЛКИ (можно зажимать) | R - ПИНОК | F - СДАТЬСЯ</div>
+        <div class="controls-info">⌨️ УПРАВЛЕНИЕ: МЫШКА / WASD / СТРЕЛКИ (можно зажимать) | R - ПИНОК (3 сек КД) | F - СДАТЬСЯ</div>
         <div class="game-buttons">
             <button id="exitGameBtn" class="exit-btn">🏳️ СДАТЬСЯ (F)</button>
             <button id="kickBtn" class="kick-btn">⚡ ПИНОК (R)</button>
@@ -163,25 +163,50 @@
 
 <script>
     (function() {
+        // ==================== СБРОС СТАТИСТИКИ (новая версия) ====================
+        const VERSION = "1.2";
+        const savedVersion = localStorage.getItem('game_version');
+        if (savedVersion !== VERSION) {
+            localStorage.clear();
+            localStorage.setItem('game_version', VERSION);
+            console.log("Сброс статистики для версии 1.2");
+        }
+        
+        // ==================== КОНСТАНТЫ ====================
+        const KICK_COOLDOWN_MS = 3000;
+        let lastKickTime = 0;
+        
         // ==================== ДАННЫЕ ====================
         let coins = 0, ownedTitles = [], activeTitle = null, adminAuthenticated = false, safeExitUnlocked = false;
         let ratings = {0:0,1:0,2:0,3:0,4:0}, difficulty = 'medium', gameMode = 'classic', prestigeLevel = 0, prestigeBonus = 0, gorchitsaUnlocked = false, gonyaEffectUsed = false, ludomanUsed = false;
         const MAX_ELO = 2000;
-        let baseEloPerGoal = { easy: 6, medium: 8, hard: 10 };
+        
+        // НОВАЯ СИСТЕМА ЭЛО: за гол даётся N ЭЛО, за пропущенный теряется СТОЛЬКО ЖЕ
+        const ELO_PER_GOAL = { easy: 2, medium: 3, hard: 5 };
+        
+        function getEloPerGoal() {
+            let playerElo = ratings[selectedChar];
+            let base = ELO_PER_GOAL[difficulty];
+            if (playerElo >= 1000) base = Math.max(1, base - 1);
+            return base;
+        }
         
         const CHAR_BUFFS = {
             0:{ name:"КОРЖИК", desc:"💪 +10% сила удара", powerBonus:1.1, hitboxBonus:1.0, special:null },
-            1:{ name:"КОМПОТ", desc:"🎯 +7% хитбокс", powerBonus:1.0, hitboxBonus:1.07, special:null },
-            2:{ name:"ГОНЯ", desc:"🍀 5% шанс 5:0 (+5% с Лудоманом)", powerBonus:1.0, hitboxBonus:1.0, special:"gonya" },
-            3:{ name:"КАРАМЕЛЬКА", desc:"🛡️ 5% шанс спасти", powerBonus:1.0, hitboxBonus:1.0, special:"karamelka" },
-            4:{ name:"ГОРЧИЦА", desc:"💪 +10% сила, 🎯 +5% хитбокс", powerBonus:1.1, hitboxBonus:1.05, special:null }
+            1:{ name:"КОМПОТ", desc:"🎯 +15% хитбокс, 💔 -10% сила удара", powerBonus:0.9, hitboxBonus:1.15, special:null },
+            2:{ name:"ГОНЯ", desc:"🍀 5% шанс мгновенной победы (+5% с Лудоманом)", powerBonus:1.0, hitboxBonus:1.0, special:"gonya" },
+            3:{ name:"КАРАМЕЛЬКА", desc:"🛡️ 5% шанс спасти свои ворота", powerBonus:1.0, hitboxBonus:1.0, special:"karamelka" },
+            4:{ name:"ГОРЧИЦА", desc:"💪 +10% сила удара, 🎯 +5% хитбокс", powerBonus:1.1, hitboxBonus:1.05, special:null }
         };
         
+        // БОТЫ: в режиме "На линии" в 2 раза сильнее
         const BOT_BUFFS = {
             easy: { powerBonus: 0.9, hitboxBonus: 0.98, speedMultiplier: 0.75 },
             medium: { powerBonus: 1.1, hitboxBonus: 1.03, speedMultiplier: 1.0 },
             hard: { powerBonus: 1.3, hitboxBonus: 1.08, speedMultiplier: 1.3 }
         };
+        
+        const LINE_MODE_MULTIPLIER = 2.0;
         
         let lastTimestamp = 0;
         let keysPressed = { w: false, s: false, a: false, d: false, up: false, down: false, left: false, right: false };
@@ -191,17 +216,6 @@
         
         function getTotalElo() { return ratings[0]+ratings[1]+ratings[2]+ratings[3]+ratings[4]; }
         function applyEloLimit() { for(let i=0;i<5;i++) { if(ratings[i]>MAX_ELO) ratings[i]=MAX_ELO; if(ratings[i]<0) ratings[i]=0; } }
-        
-        function getEloPerGoal() {
-            let playerElo = ratings[selectedChar];
-            let base = baseEloPerGoal[difficulty];
-            if (playerElo >= 1000) {
-                if (difficulty === 'hard') return 8;
-                if (difficulty === 'medium') return 4;
-                if (difficulty === 'easy') return 3;
-            }
-            return base;
-        }
         
         function getTitleBonusPerGoal() { return activeTitle === 'prime' ? 10 : 0; }
         
@@ -229,7 +243,13 @@
             return false;
         }
         
-        function checkKaramelkaSave() { return CHAR_BUFFS[selectedChar].special === 'karamelka' && Math.random() < 0.05; }
+        function checkKaramelkaSave() {
+            if (CHAR_BUFFS[selectedChar].special === 'karamelka') {
+                return Math.random() < 0.05;
+            }
+            return false;
+        }
+        
         function checkLudomanEffect() {
             if (activeTitle === 'ludoman' && !ludomanUsed && Math.random() < 0.1) {
                 ludomanUsed = true;
@@ -256,7 +276,7 @@
         }
         
         function loadData() {
-            const saved=localStorage.getItem('ah_final_v14');
+            const saved=localStorage.getItem('ah_final_v18');
             if(saved){
                 try{ const d=JSON.parse(saved); coins=d.coins||0; ownedTitles=d.ownedTitles||[]; activeTitle=d.activeTitle||null; ratings=d.ratings||{0:0,1:0,2:0,3:0,4:0}; safeExitUnlocked=d.safeExitUnlocked||false; prestigeLevel=d.prestigeLevel||0; prestigeBonus=d.prestigeBonus||0; gorchitsaUnlocked=d.gorchitsaUnlocked||false; }catch(e){}
             }
@@ -264,7 +284,7 @@
             updateStatsDisplay();
             checkGorchitsaUnlock();
         }
-        function saveData() { localStorage.setItem('ah_final_v14', JSON.stringify({coins, ownedTitles, activeTitle, ratings, safeExitUnlocked, prestigeLevel, prestigeBonus, gorchitsaUnlocked})); }
+        function saveData() { localStorage.setItem('ah_final_v18', JSON.stringify({coins, ownedTitles, activeTitle, ratings, safeExitUnlocked, prestigeLevel, prestigeBonus, gorchitsaUnlocked})); }
         function updateStatsDisplay() { 
             document.getElementById('coinsDisplay').innerText=coins; 
             let total=getTotalElo();
@@ -304,10 +324,26 @@
         let playerPaddle={ x:W/2, y:H-85 }, botPaddle={ x:W/2, y:85 }, mouseX=W/2, mouseY=H-85, puck={ x:W/2, y:H/2, vx:0, vy:0 };
         
         let baseBotSpeed = { easy: 0.035, medium: 0.07, hard: 0.1 };
-        function getBotSpeed(){ return baseBotSpeed[difficulty] * BOT_BUFFS[difficulty].speedMultiplier; }
-        function getBotErrorChance(){ return { easy:0.3, medium:0.1, hard:0.03 }[difficulty]; }
-        function getBotPowerBonus(){ return BOT_BUFFS[difficulty].powerBonus; }
-        function getBotHitboxBonus(){ return BOT_BUFFS[difficulty].hitboxBonus; }
+        function getBotSpeed(){ 
+            let mult = BOT_BUFFS[difficulty].speedMultiplier;
+            if (gameMode === 'line') mult *= LINE_MODE_MULTIPLIER;
+            return baseBotSpeed[difficulty] * mult;
+        }
+        function getBotErrorChance(){ 
+            let base = { easy:0.3, medium:0.1, hard:0.03 }[difficulty];
+            if (gameMode === 'line') base = Math.max(0.01, base - 0.1);
+            return base;
+        }
+        function getBotPowerBonus(){ 
+            let base = BOT_BUFFS[difficulty].powerBonus;
+            if (gameMode === 'line') base *= LINE_MODE_MULTIPLIER;
+            return base;
+        }
+        function getBotHitboxBonus(){ 
+            let base = BOT_BUFFS[difficulty].hitboxBonus;
+            if (gameMode === 'line') base *= LINE_MODE_MULTIPLIER;
+            return base;
+        }
         
         function renderCharacters(){
             const grid=document.getElementById('charsGrid'); grid.innerHTML='';
@@ -319,7 +355,7 @@
                 const div=document.createElement('div'); 
                 div.className='char'+(i===selectedChar?' selected':'')+(isLocked?' locked':'')+(isPrime?' prime':'');
                 let info='';
-                if(i===selectedChar && !isLocked) info=`<div class="char-elo-info">📈 ${getEloPerGoal()} ЭЛО/ГОЛ</div>`;
+                if(i===selectedChar && !isLocked) info=`<div class="char-elo-info">📈 ${getEloPerGoal()} ЭЛО/ГОЛ | 💔 ${getEloPerGoal()} ЗА ПРОПУЩ</div>`;
                 let lockText='';
                 if(isLocked) lockText='<div class="char-buff" style="color:#ff8888;">🔒 2000 ЭЛО НА ЛЮБОМ</div>';
                 else if(isPrime) lockText='<div class="char-buff" style="color:gold;">🌟 В ПРАЙМЕ 🌟</div>';
@@ -359,6 +395,9 @@
         }
         
         function kickReset(){ 
+            const now = Date.now();
+            if (now - lastKickTime < KICK_COOLDOWN_MS) return;
+            lastKickTime = now;
             if(gameActive && !gameFinished && !isRespawning && !isExiting){ 
                 let side = (playerScore > botScore) ? 'bot' : 'player';
                 if (side === 'player') {
@@ -383,8 +422,15 @@
             if(isSafeExit && safeExitUnlocked && adminAuthenticated) msg=`🚪 БЕЗОПАСНЫЙ ВЫХОД 🚪<br>${playerScore}:${botScore}<br>⚡ 0 ЭЛО ⚡`;
             else if(isSurrender){ let p=surrenderPenalty[difficulty]; totalGain=p; ratings[selectedChar]+=p; applyEloLimit(); msg=`🏳️ СДАЧА! 🏳️<br>${playerScore}:${botScore}<br>${totalGain} ЭЛО`; saveData(); updateStatsDisplay(); renderCharacters(); }
             else if(playerScore===botScore){ totalGain=drawPenalty; ratings[selectedChar]+=totalGain; applyEloLimit(); msg=`🤝 НИЧЬЯ! 🤝<br>${playerScore}:${botScore}<br>${totalGain} ЭЛО`; saveData(); updateStatsDisplay(); renderCharacters(); }
-            else{ let isWin=playerScore>botScore; let diff=playerScore-botScore; let base=diff*getEloPerGoal(); let bonus=playerScore*getTitleBonusPerGoal(); totalGain=base+bonus; ratings[selectedChar]+=totalGain; applyEloLimit();
-                if(isWin) msg=`🏆 ПОБЕДА! 🏆<br>${playerScore}:${botScore}<br>+${totalGain} ЭЛО`+(bonus?` (вкл. +${bonus} от титула)`:'');
+            else{ 
+                let diff = playerScore - botScore;
+                let perGoal = getEloPerGoal();
+                totalGain = diff * perGoal;
+                let titleBonus = (playerScore > botScore) ? playerScore * getTitleBonusPerGoal() : 0;
+                totalGain += titleBonus;
+                ratings[selectedChar] += totalGain;
+                applyEloLimit();
+                if(playerScore > botScore) msg=`🏆 ПОБЕДА! 🏆<br>${playerScore}:${botScore}<br>+${totalGain} ЭЛО`+(titleBonus?` (вкл. +${titleBonus} от титула)`:'');
                 else msg=`😭 ПОРАЖЕНИЕ... 😭<br>${playerScore}:${botScore}<br>${totalGain} ЭЛО`;
                 saveData(); updateStatsDisplay(); renderCharacters();
                 checkGorchitsaUnlock();
@@ -397,7 +443,18 @@
         
         function scoreGoal(who){
             if(gameFinished || isRespawning || isExiting) return;
-            if(who==='bot' && checkKaramelkaSave()){ alert("🛡️ КАРАМЕЛЬКА! ГОЛ НЕ ЗАСЧИТАН!"); return; }
+            
+            if (who === 'bot' && checkKaramelkaSave()) {
+                alert("🛡️ КАРАМЕЛЬКА! ГОЛ НЕ ЗАСЧИТАН! 🛡️");
+                puck.x = playerPaddle.x;
+                puck.y = playerPaddle.y - 50;
+                puck.vx = (Math.random() - 0.5) * 5;
+                puck.vy = -5 - Math.random() * 2;
+                puck.x = Math.max(PUCK_RADIUS+10, Math.min(W-PUCK_RADIUS-10, puck.x));
+                puck.y = Math.max(PUCK_RADIUS+10, Math.min(H-PUCK_RADIUS-10, puck.y));
+                return;
+            }
+            
             isRespawning=true; const flash=document.createElement('div'); flash.className='goal-flash'; document.getElementById('gameScreen').appendChild(flash); setTimeout(()=>flash.remove(),500);
             if(who==='player') playerScore++; else botScore++;
             document.getElementById('playerScore').innerText=playerScore; document.getElementById('botScore').innerText=botScore;
@@ -486,29 +543,17 @@
             animationId = requestAnimationFrame(gameLoop);
         }
         
-        // ==================== УПРАВЛЕНИЕ (РАБОТАЕТ В ЛЮБОЙ РАСКЛАДКЕ) ====================
+        // Управление
         function handleKeyDown(e) {
             const k = e.key;
-            
-            // Маппинг русских букв на английские
-            const ruToEn = {
-                'ц': 'w', 'ы': 's', 'ф': 'a', 'в': 'd',  // WASD
-                'к': 'r',  // R
-                'а': 'f'   // F (сдаться)
-            };
-            
+            const ruToEn = { 'ц': 'w', 'ы': 's', 'ф': 'a', 'в': 'd', 'к': 'r', 'а': 'f' };
             let mappedKey = ruToEn[k] || k;
             
-            // Движение (WASD + Стрелки)
             if (mappedKey === 'w' || k === 'ArrowUp') { keysPressed.w = true; keysPressed.up = true; e.preventDefault(); }
             if (mappedKey === 's' || k === 'ArrowDown') { keysPressed.s = true; keysPressed.down = true; e.preventDefault(); }
             if (mappedKey === 'a' || k === 'ArrowLeft') { keysPressed.a = true; keysPressed.left = true; e.preventDefault(); }
             if (mappedKey === 'd' || k === 'ArrowRight') { keysPressed.d = true; keysPressed.right = true; e.preventDefault(); }
-            
-            // R — Пинок (русская 'к' или английская 'r')
             if (mappedKey === 'r') { kickReset(); e.preventDefault(); }
-            
-            // F — Сдаться (русская 'а' или английская 'f')
             if (mappedKey === 'f') { if (!gameFinished && !isExiting) surrender(); e.preventDefault(); }
         }
         
@@ -516,7 +561,6 @@
             const k = e.key;
             const ruToEn = { 'ц': 'w', 'ы': 's', 'ф': 'a', 'в': 'd' };
             let mappedKey = ruToEn[k] || k;
-            
             if (mappedKey === 'w' || k === 'ArrowUp') { keysPressed.w = false; keysPressed.up = false; e.preventDefault(); }
             if (mappedKey === 's' || k === 'ArrowDown') { keysPressed.s = false; keysPressed.down = false; e.preventDefault(); }
             if (mappedKey === 'a' || k === 'ArrowLeft') { keysPressed.a = false; keysPressed.left = false; e.preventDefault(); }
@@ -553,7 +597,7 @@
             const pOwn=ownedTitles.includes('prime'), lOwn=ownedTitles.includes('ludoman');
             cont.innerHTML=`
                 <div class="shop-item ${pOwn?'owned':''}"><div>🏆</div><div><strong>ТИТУЛ "НАСТОЯЩИЙ ЧЕМПИОН"</strong></div><div>+10 ЭЛО после победы</div><div>💰 75 МОНЕТ</div>${pOwn?'<div>✅ КУПЛЕНО</div>':'<button class="buy-btn prime">КУПИТЬ</button>'}</div>
-                <div class="shop-item ${lOwn?'owned':''}"><div>🎲</div><div><strong>ТИТУЛ "ЛУДОМАН"</strong></div><div>+5% шанс 5:0 (складывается с Гоней)</div><div>💰 75 МОНЕТ</div>${lOwn?'<div>✅ КУПЛЕНО</div>':'<button class="buy-btn ludoman">КУПИТЬ</button>'}</div>`;
+                <div class="shop-item ${lOwn?'owned':''}"><div>🎲</div><div><strong>ТИТУЛ "ЛУДОМАН"</strong></div><div>10% шанс 5:0 в начале</div><div>💰 75 МОНЕТ</div>${lOwn?'<div>✅ КУПЛЕНО</div>':'<button class="buy-btn ludoman">КУПИТЬ</button>'}</div>`;
             const pBtn=cont.querySelector('.buy-btn.prime');
             if(pBtn) pBtn.onclick=()=>{ if(coins>=75 && !ownedTitles.includes('prime')){ coins-=75; ownedTitles.push('prime'); saveData(); updateStatsDisplay(); renderShop(); renderTitles(); renderCharacters(); alert('🎉 Титул "НАСТОЯЩИЙ ЧЕМПИОН" куплен!'); } else alert('Недостаточно монет!'); };
             const lBtn=cont.querySelector('.buy-btn.ludoman');
@@ -565,7 +609,7 @@
             const list=ownedTitles.filter(t=>t!=='gorchitsa');
             if(!list.length){ cont.innerHTML='<div style="padding:20px;">😢 Нет титулов</div>'; return; }
             cont.innerHTML=list.map(t=>{
-                let name=t==='prime'?'НАСТОЯЩИЙ ЧЕМПИОН':'ЛУДОМАН', desc=t==='prime'?'+10 ЭЛО после победы':'+5% шанс 5:0 (с Гоней)';
+                let name=t==='prime'?'НАСТОЯЩИЙ ЧЕМПИОН':'ЛУДОМАН', desc=t==='prime'?'+10 ЭЛО после победы':'10% шанс 5:0 в начале';
                 return `<div class="shop-item ${activeTitle===t?'active-title':''}">
                     <div>${t==='prime'?'🏆':'🎲'}</div>
                     <div><strong>${name}</strong></div>
